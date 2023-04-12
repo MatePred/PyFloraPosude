@@ -71,9 +71,9 @@ class UserEndpoint:
             user = User.query.filter_by(username=form.username.data).first()
             #userDto = userService.getUserByName(form.username.data)
             if user:
-                if bcrypt.check_password_hash(user.password, form.password.data):
+                if bcrypt.check_password_hash(user.pwd, form.password.data):
                     login_user(user)
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('users.dashboard'))
                     log = ""
                 else:
                     print("Incorrect password!")
@@ -89,11 +89,21 @@ class UserEndpoint:
         form = RegisterForm()
 
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.password.data)
-            new_user = User(username=form.username.data, password=hashed_password)
-            db.session.add(new_user)
-            db.session.commit()
-            return redirect(url_for('login'))
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+            user_data = {
+                'username': form.username.data,
+                'pwd': hashed_password
+            }
+            #new_user = User(username=form.username.data, password=hashed_password)
+            #print("user data:")
+            #print(hashed_password)
+            #print(user_data)
+            #print(json.dumps(user_data))
+            new_user = userService.createUser(json.dumps(user_data))
+            #print(new_user)
+            #db.session.add(new_user)
+            #db.session.commit()
+            return redirect(url_for('users.login'))
 
         return render_template('register.html', form=form)
 
@@ -104,9 +114,11 @@ class UserEndpoint:
         return render_template('dashboard.html')
 
     @staticmethod
-    @users.route('/home2', methods=['GET', 'POST'])
-    def home2():
-        return render_template('home2.html')
+    @users.route('/logout', methods=['GET', 'POST'])
+    @login_required
+    def logout():
+        logout_user()
+        return redirect(url_for('users.login'))
 
     @staticmethod
     @users.route("/", methods=['GET'])

@@ -18,7 +18,7 @@ class User(db.Model, UserMixin):
     #surname = db.Column(db.String(50), nullable=False)
     #email = db.Column(db.String(70), unique=True, nullable=False)
     username = db.Column(db.String(30), unique=True, nullable=False)
-    pwd = db.Column(db.String(50), nullable=False)
+    pwd = db.Column(db.String(80), nullable=False)
     user_type = db.Column(db.Integer, db.ForeignKey('user_type.type'), nullable=False)
     created = db.Column(db.String(20), nullable=False)
 
@@ -29,9 +29,9 @@ class User(db.Model, UserMixin):
         #user.surname = dto.surname
         #user.email = dto.email
         user.username = dto.username
-        user.pwd = dto.password
+        user.pwd = dto.pwd
         user.created = str(int(dt.now().timestamp()))
-        user.user_type = UserTypeEnum.OBSERVER.value
+        user.user_type = UserTypeEnum.USER.value
         return user
 
 

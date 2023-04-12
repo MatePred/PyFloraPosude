@@ -8,7 +8,7 @@ class UserDto(JSONSerializator):
         #self.surname = None
         #self.email = None
         self.username = None
-        self.password = None
+        self.pwd = None
         self.userType = None
 
     @staticmethod
@@ -19,7 +19,7 @@ class UserDto(JSONSerializator):
         #dto.surname = e.surname
         #dto.email = e.email
         dto.username = e.username
-        dto.password = e.pwd
+        dto.pwd = e.pwd
         dto.userType = e.user_type
         return dto
 
@@ -27,10 +27,8 @@ class UserDto(JSONSerializator):
     def getJson(self):
        model = {
            "id": self.id,
-           "name": self.name,
-           "surname": self.surname,
-           "email": self.email,
            "username": self.username,
+           "pwd": self.pwd,
            "userType": self.userType
        }
        return model

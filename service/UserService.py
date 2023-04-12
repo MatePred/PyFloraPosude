@@ -12,7 +12,9 @@ class UserService:
 
 
     def createUser(self, userData):
+        print(userData)
         userDto = UserDto().serialize(userData, ignoreProperties=False)
+        print(userDto)
         user = User.createUserFromDto(userDto)
         user = DBUtils.insert(user)
         if user is not None:
