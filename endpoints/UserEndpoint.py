@@ -9,6 +9,7 @@ from service.UserService import UserService
 from flask_bcrypt import Bcrypt
 import json
 from datasource.entity.User import User
+from datasource.entity.UserType import UserTypeEnum
 
 
 users = Blueprint('users', __name__)
@@ -70,14 +71,25 @@ class UserEndpoint:
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
             #userDto = userService.getUserByName(form.username.data)
+            #print(userDto)
+            #administrator   12345678
+
             if user:
-                if bcrypt.check_password_hash(user.pwd, form.password.data):
-                    login_user(user)
-                    return redirect(url_for('users.dashboard'))
-                    log = ""
-                else:
-                    print("Incorrect password!")
-                    log = "Incorrect password!"
+                try:
+                    if bcrypt.check_password_hash(user.pwd, form.password.data):
+                        login_user(user)
+                        if user.user_type == UserTypeEnum.ADMIN.value:
+                            return redirect(url_for('users.adminPanel'))
+                        else:
+                            return redirect(url_for('users.dashboard'))
+                        log = ""
+                    else:
+                        print("Incorrect password!")
+                        log = "Incorrect password!"
+                except:
+                    print("An exception occurred")
+                    log = "An exception occurred"
+
             else:
                 print("User does not exist!")
                 log = "User does not exist!"
@@ -94,24 +106,30 @@ class UserEndpoint:
                 'username': form.username.data,
                 'pwd': hashed_password
             }
-            #new_user = User(username=form.username.data, password=hashed_password)
-            #print("user data:")
-            #print(hashed_password)
-            #print(user_data)
-            #print(json.dumps(user_data))
             new_user = userService.createUser(json.dumps(user_data))
-            #print(new_user)
-            #db.session.add(new_user)
-            #db.session.commit()
             return redirect(url_for('users.login'))
 
         return render_template('register.html', form=form)
 
     @staticmethod
     @users.route('/dashboard', methods=['GET', 'POST'])
-    #@login_required
+    @login_required
     def dashboard():
         return render_template('dashboard.html')
+
+    @staticmethod
+    @users.route('/adminPanel', methods=['GET', 'POST'])
+    @login_required
+    def adminPanel():
+        #ucitaj sve usere iz baze u listu i predaj ju templateu
+        #na submit button se posalje "post" metoda
+        choices = ['apple', 'banana', 'cherry', 'durian']
+        options = ['Option 1', 'Option 2', 'Option 3']
+        selected_option = None
+        if request.method == 'POST':
+            selected_option = request.form['option']
+            print(selected_option)
+        return render_template('adminPanel.html', options=options,choices=choices,selected_option=selected_option)
 
     @staticmethod
     @users.route('/logout', methods=['GET', 'POST'])

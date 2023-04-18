@@ -34,4 +34,16 @@ class User(db.Model, UserMixin):
         user.user_type = UserTypeEnum.USER.value
         return user
 
+    @staticmethod
+    def createAdminUserFromDto(dto):
+        user = User()
+        #user.name = dto.name
+        #user.surname = dto.surname
+        #user.email = dto.email
+        user.username = dto.username
+        user.pwd = dto.pwd
+        user.created = str(int(dt.now().timestamp()))
+        user.user_type = UserTypeEnum.ADMIN.value
+        return user
+
 
