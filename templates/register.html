@@ -11,14 +11,18 @@
 
 <body>
     <h1>Register Page</h1>
+    <br><br>
 
     <form method="POST" action="">
         {{ form.hidden_tag() }}
+        <br>
         {{ form.username }}
+        <br>
         {{ form.password }}
+        <br>
         {{ form.submit }}
     </form>
-
+    <br><br>
     <a href="{{ url_for('users.login') }}">Already have an account? Log In</a>
 </body>
 

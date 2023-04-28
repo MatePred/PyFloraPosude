@@ -48,7 +48,7 @@ class InitializeService:
             administratorDTO.pwd = bcrypt.generate_password_hash("12345678").decode("utf-8")
             administrator = User.createAdminUserFromDto(administratorDTO)
 
-            print(administrator)
+            #print(administrator)
             cl.add_params("insert-user-types", admin, user)
             cl.add_params("insert-admin", administrator)
 

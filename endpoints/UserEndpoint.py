@@ -29,9 +29,7 @@ def load_user(user_id):
 
 class RegisterForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
-
     password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
-
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -41,22 +39,25 @@ class RegisterForm(FlaskForm):
             raise ValidationError(
                 'That username already exists. Please choose a different one.')
 
+class ModifyUserForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
+    password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
+    submit = SubmitField('Modify')
+
+
+
+
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[
                            InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
 
     password = PasswordField(validators=[
-                             InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
+                             InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Username"})
 
     submit = SubmitField('Login')
 
 class UserEndpoint:
-
-    #@login_manager.user_loader
-    #def load_user(user_id):
-    #   return User.query.get(int(user_id))
-        #return userService.getUserById(user_id)
 
     @staticmethod
     @users.route('/')
@@ -70,8 +71,6 @@ class UserEndpoint:
         log = ""
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
-            #userDto = userService.getUserByName(form.username.data)
-            #print(userDto)
             #administrator   12345678
 
             if user:
@@ -122,14 +121,39 @@ class UserEndpoint:
     @login_required
     def adminPanel():
         #ucitaj sve usere iz baze u listu i predaj ju templateu
-        #na submit button se posalje "post" metoda
-        choices = ['apple', 'banana', 'cherry', 'durian']
-        options = ['Option 1', 'Option 2', 'Option 3']
+
         selected_option = None
+        form = ModifyUserForm()
+
+
+        #print(request.method)
         if request.method == 'POST':
-            selected_option = request.form['option']
-            print(selected_option)
-        return render_template('adminPanel.html', options=options,choices=choices,selected_option=selected_option)
+            if 'option' in request.form:
+                selected_option = request.form['option']
+
+            if form.validate_on_submit():
+
+                hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+                user_data = {
+                    'username': form.username.data,
+                    'pwd': hashed_password
+                }
+                print(user_data)
+                print(selected_option)
+                user_to_mod = userService.getUserByName(selected_option)
+                print(user_to_mod)
+                mod_user = userService.updateUser(json.dumps(user_data),user_to_mod.id)
+                print(mod_user)
+
+            if 'SbmBtn_DeleteUser' in request.form:
+                if(selected_option):
+                    if selected_option != "administrator":
+                        userService.deleteUserByName(selected_option)
+                    print(selected_option)
+                print("SbmBtn_DeleteUser")
+
+        options = userService.getAllUsersNames()
+        return render_template('adminPanel.html', options=options,selected_option=selected_option,form=form)
 
     @staticmethod
     @users.route('/logout', methods=['GET', 'POST'])

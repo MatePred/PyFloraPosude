@@ -33,6 +33,13 @@ class UserService:
             userDtoList.append(UserDto.createFromEntity(u).getJson())
         return userDtoList
 
+    def getAllUsersNames(self):
+        userDtoList = []
+        users = DBUtils.findAll(User)
+        for u in users:
+            userDtoList.append(UserDto.createFromEntity(u).username)
+        return userDtoList
+
 
     def getUserById(self, id):
         user = DBUtils.findById(User, id)
@@ -51,8 +58,11 @@ class UserService:
     def deleteUserById(self, id):
         return DBUtils.deleteById(User, id)
 
+    def deleteUserByName(self, name):
+        return DBUtils.deleteByName(User, name)
 
-    def updateUser(self, userData, id, token):
+
+    def updateUser(self, userData, id):
         userDto: UserDto = UserDto().serialize(userData, ignoreProperties=False)
         user: User = DBUtils.findById(User, id)
         # dohvatite token po value-u
@@ -60,20 +70,12 @@ class UserService:
 
         updated = False
         if user is not None:
-            if userDto.name is not None and user.name != userDto.name:
-                user.name = userDto.name
-                updated = True
-
-            if userDto.surname is not None and user.surname != userDto.surname:
-                user.surname = userDto.surname
-                updated = True
-
-            if userDto.email is not None and user.email != userDto.email:
-                user.email = userDto.email
-                updated = True
-
             if userDto.username is not None and user.username != userDto.username:
                 user.username = userDto.username
+                updated = True
+
+            if userDto.pwd is not None and user.pwd != userDto.pwd:
+                user.pwd = userDto.pwd
                 updated = True
 
             if updated:
