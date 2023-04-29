@@ -45,9 +45,6 @@ class ModifyUserForm(FlaskForm):
     submit = SubmitField('Modify')
 
 
-
-
-
 class LoginForm(FlaskForm):
     username = StringField(validators=[
                            InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
@@ -62,7 +59,7 @@ class UserEndpoint:
     @staticmethod
     @users.route('/')
     def home():
-        return render_template('home.html')
+        return render_template('index.html')
 
     @staticmethod
     @users.route('/login', methods=['GET', 'POST'])
@@ -114,7 +111,7 @@ class UserEndpoint:
     @users.route('/dashboard', methods=['GET', 'POST'])
     @login_required
     def dashboard():
-        return render_template('dashboard.html')
+        return render_template('listaPosuda.html')
 
     @staticmethod
     @users.route('/adminPanel', methods=['GET', 'POST'])
@@ -125,34 +122,37 @@ class UserEndpoint:
         selected_option = None
         form = ModifyUserForm()
 
-
         #print(request.method)
         if request.method == 'POST':
             if 'option' in request.form:
                 selected_option = request.form['option']
 
-            if form.validate_on_submit():
-
+            if form.validate_on_submit() and selected_option is not None:
                 hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
                 user_data = {
                     'username': form.username.data,
                     'pwd': hashed_password
                 }
-                print(user_data)
-                print(selected_option)
-                user_to_mod = userService.getUserByName(selected_option)
-                print(user_to_mod)
-                mod_user = userService.updateUser(json.dumps(user_data),user_to_mod.id)
-                print(mod_user)
+                # check if modified username allready is used in database
+                # but not in a user you want to mofiy - in that way you are able
+                #to modify password only
+                usernames = userService.getAllUsersNames()
+                usernames.remove(selected_option)
+
+                if user_data['username'] not in usernames :
+                    user_to_mod = userService.getUserByName(selected_option)
+                    userService.updateUser(json.dumps(user_data),user_to_mod['id'])
+                else:
+                    print("Username allready exist.")
 
             if 'SbmBtn_DeleteUser' in request.form:
                 if(selected_option):
                     if selected_option != "administrator":
                         userService.deleteUserByName(selected_option)
                     print(selected_option)
-                print("SbmBtn_DeleteUser")
 
         options = userService.getAllUsersNames()
+        options.remove("administrator")
         return render_template('adminPanel.html', options=options,selected_option=selected_option,form=form)
 
     @staticmethod

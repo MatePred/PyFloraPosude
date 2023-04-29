@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Administrator Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
 </head>
-<style>
-table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
 <body>
-    <h1>PyFloraPosude - Administrator Panel.</h1>
-    <a href="{{url_for('users.logout')}}">Press here to logout</a>
+    <div class="top-section" >
+        <!-- content goes here -->
+        <div style="text-align: center; font-size: 12px;">
+            <h1>PyFloraPosude</h1>
+        </div>
+        <div style="text-align: center;">
+            <h1>Administrator Panel</h1>
+        </div>
+        <div style="text-align: right;">
+            <a href="{{url_for('users.logout')}}">Press here to logout</a>
+        </div>
+    </div>
 
     <form method="post">
         <p>Select user:</p>
@@ -23,9 +28,8 @@ table, th, td {
       {% endfor %}
         <br><br>
         <input type="submit" name="SbmBtn_DeleteUser" value="Delete user.">
-    </form>
-
-    <form method="POST" action="">
+        <br><br>
+        <form method="POST" action="">
         {{ form.hidden_tag() }}
         <br>
         {{ form.username }}
@@ -33,7 +37,10 @@ table, th, td {
         {{ form.password }}
         <br>
         {{ form.submit }}
+        </form>
     </form>
+
+
 
 </body>
 </html>
