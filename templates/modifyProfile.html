@@ -5,34 +5,31 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>listaPosuda</title>
+    <title>modifyProfile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
 </head>
 
 <body>
 <div class="top-section">
     <!-- content goes here -->
-    <div style="position: absolute; right: 20px;">
-        <form method="post">
-            <input type="submit" name="SbmBtn_UserProfile" value={{current_user}}
-                   style="width: 100px; height: 30px;">
-        </form>
-    </div>
     <div style="text-align: center; font-size: 12px;">
         <h1>PyFloraPosude</h1>
     </div>
-
     <div style="text-align: center;">
-        <h1>Lista Posuda</h1>
+        <h1>{{current_user}}</h1>
     </div>
-    <div style="position: absolute; right: 0;">
-        <a href="{{url_for('users.logout')}}">Press here to logout</a>
-    </div>
-
 </div>
-
-<h1>Hello you are logged in.</h1>
-
+<div style="text-align: center;">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <br>
+        {{ form.username }}
+        <br>
+        {{ form.password }}
+        <br><br>
+        {{ form.submit }}
+    </form>
+</div>
 </body>
 
 </html>

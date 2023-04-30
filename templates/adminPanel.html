@@ -6,30 +6,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
 </head>
 <body>
-    <div class="top-section" >
-        <!-- content goes here -->
-        <div style="text-align: center; font-size: 12px;">
-            <h1>PyFloraPosude</h1>
-        </div>
-        <div style="text-align: center;">
-            <h1>Administrator Panel</h1>
-        </div>
-        <div style="text-align: right;">
-            <a href="{{url_for('users.logout')}}">Press here to logout</a>
-        </div>
+<div class="top-section">
+    <!-- content goes here -->
+    <div style="text-align: center; font-size: 12px;">
+        <h1>PyFloraPosude</h1>
     </div>
+    <div style="text-align: center;">
+        <h1>Administrator Panel</h1>
+    </div>
+    <div style="text-align: right;">
+        <a href="{{url_for('users.logout')}}">Press here to logout</a>
+    </div>
+</div>
 
-    <form method="post">
-        <p>Select user:</p>
-      {% for option in options %}
-        <input type="radio" name="option" value="{{ option }}"
-          {% if selected_option == option %}checked{% endif %}>
-        {{ option }}<br>
-      {% endfor %}
-        <br><br>
-        <input type="submit" name="SbmBtn_DeleteUser" value="Delete user.">
-        <br><br>
-        <form method="POST" action="">
+<form method="post">
+    <p>Select user:</p>
+    {% for option in options %}
+    <input type="radio" name="option" value="{{ option }}"
+           {% if selected_option== option %}checked{% endif %}>
+    {{ option }}<br>
+    {% endfor %}
+    <br><br>
+
+    <input type="submit" name="SbmBtn_DeleteUser" value="Delete user.">
+    <br><br>
+
+    <form method="POST" action="">
         {{ form.hidden_tag() }}
         <br>
         {{ form.username }}
@@ -37,9 +39,8 @@
         {{ form.password }}
         <br>
         {{ form.submit }}
-        </form>
     </form>
-
+</form>
 
 
 </body>

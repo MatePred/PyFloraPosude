@@ -11,7 +11,6 @@ import json
 from datasource.entity.User import User
 from datasource.entity.UserType import UserTypeEnum
 
-
 users = Blueprint('users', __name__)
 
 bcrypt = Bcrypt(app)
@@ -27,32 +26,47 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 class RegisterForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
     password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
-    submit = SubmitField('Register')
+    submit = SubmitField('Registracija')
 
     def validate_username(self, username):
         existing_user_username = User.query.filter_by(username=username.data).first()
-        #existing_user_username = userService.getUserByName(username.data)
+        # existing_user_username = userService.getUserByName(username.data)
         if existing_user_username:
             raise ValidationError(
                 'That username already exists. Please choose a different one.')
 
-class ModifyUserForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
-    password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
-    submit = SubmitField('Modify')
 
+class ModifyUserForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"},default='JohnDoe')
+    password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
+    submit = SubmitField('Izmjeni')
+
+def modifyUser(user_data, usernameToModify):
+    # check if modified username allready is used in database
+    # but not in a user you want to mofiy - in that way you are able
+    # to modify password only
+    usernames = userService.getAllUsersNames()
+    usernames.remove(usernameToModify)
+
+    if user_data['username'] not in usernames:
+        user_to_mod = userService.getUserByName(usernameToModify)
+        userService.updateUser(json.dumps(user_data), user_to_mod['id'])
+    else:
+        print("Username allready exist.")
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[
-                           InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
+        InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
 
     password = PasswordField(validators=[
-                             InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Username"})
+        InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Username"})
 
-    submit = SubmitField('Login')
+    submit = SubmitField('Prijava')
+
 
 class UserEndpoint:
 
@@ -68,7 +82,7 @@ class UserEndpoint:
         log = ""
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
-            #administrator   12345678
+            # administrator   12345678
 
             if user:
                 try:
@@ -77,7 +91,7 @@ class UserEndpoint:
                         if user.user_type == UserTypeEnum.ADMIN.value:
                             return redirect(url_for('users.adminPanel'))
                         else:
-                            return redirect(url_for('users.dashboard'))
+                            return redirect(url_for('users.listaPosuda'))
                         log = ""
                     else:
                         print("Incorrect password!")
@@ -108,21 +122,41 @@ class UserEndpoint:
         return render_template('register.html', form=form)
 
     @staticmethod
-    @users.route('/dashboard', methods=['GET', 'POST'])
+    @users.route('/listaPosuda', methods=['GET', 'POST'])
     @login_required
-    def dashboard():
-        return render_template('listaPosuda.html')
+    def listaPosuda():
+        if request.method == 'POST':
+            if 'SbmBtn_UserProfile' in request.form:
+                #return render_template('modifyProfile.html', current_user=current_user.username)
+                return redirect(url_for('users.modifyProfile'))
+        return render_template('listaPosuda.html', current_user=current_user.username)
+
+    @staticmethod
+    @users.route('/modifyProfile', methods=['GET', 'POST'])
+    @login_required
+    def modifyProfile():
+        form = ModifyUserForm()
+        if request.method == 'POST':
+            if form.validate_on_submit() and current_user.username is not None:
+                hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+                user_data = {
+                    'username': form.username.data,
+                    'pwd': hashed_password
+                }
+                modifyUser(user_data, current_user.username)
+
+        return render_template('modifyProfile.html', current_user=current_user.username, form=form)
 
     @staticmethod
     @users.route('/adminPanel', methods=['GET', 'POST'])
     @login_required
     def adminPanel():
-        #ucitaj sve usere iz baze u listu i predaj ju templateu
+        # ucitaj sve usere iz baze u listu i predaj ju templateu
 
         selected_option = None
         form = ModifyUserForm()
 
-        #print(request.method)
+        # print(request.method)
         if request.method == 'POST':
             if 'option' in request.form:
                 selected_option = request.form['option']
@@ -133,27 +167,29 @@ class UserEndpoint:
                     'username': form.username.data,
                     'pwd': hashed_password
                 }
-                # check if modified username allready is used in database
-                # but not in a user you want to mofiy - in that way you are able
-                #to modify password only
-                usernames = userService.getAllUsersNames()
-                usernames.remove(selected_option)
+                # # check if modified username allready is used in database
+                # # but not in a user you want to mofiy - in that way you are able
+                # # to modify password only
+                # usernames = userService.getAllUsersNames()
+                # usernames.remove(selected_option)
+                #
+                # if user_data['username'] not in usernames:
+                #     user_to_mod = userService.getUserByName(selected_option)
+                #     userService.updateUser(json.dumps(user_data), user_to_mod['id'])
+                # else:
+                #     print("Username allready exist.")
 
-                if user_data['username'] not in usernames :
-                    user_to_mod = userService.getUserByName(selected_option)
-                    userService.updateUser(json.dumps(user_data),user_to_mod['id'])
-                else:
-                    print("Username allready exist.")
+                modifyUser(user_data, selected_option)
 
             if 'SbmBtn_DeleteUser' in request.form:
-                if(selected_option):
+                if (selected_option):
                     if selected_option != "administrator":
                         userService.deleteUserByName(selected_option)
                     print(selected_option)
 
         options = userService.getAllUsersNames()
         options.remove("administrator")
-        return render_template('adminPanel.html', options=options,selected_option=selected_option,form=form)
+        return render_template('adminPanel.html', options=options, selected_option=selected_option, form=form)
 
     @staticmethod
     @users.route('/logout', methods=['GET', 'POST'])
@@ -166,12 +202,3 @@ class UserEndpoint:
     @users.route("/", methods=['GET'])
     def getAllUsers():
         return json.dumps(userService.getAllUsers())
-
-
-
-
-
-
-
-
-

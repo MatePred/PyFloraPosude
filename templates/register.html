@@ -10,22 +10,28 @@
 </head>
 
 <body>
-    <div class="top-section" >
-        <!-- content goes here -->
-        <h1>PyFloraPosude - Register.</h1>
+<div class="top-section">
+    <!-- content goes here -->
+    <div style="text-align: center; font-size: 12px;">
+        <h1>PyFloraPosude</h1>
     </div>
-
+    <div style="text-align: center;">
+        <h1>Registracija</h1>
+    </div>
+</div>
+<div style="text-align: center;">
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <br>
         {{ form.username }}
         <br>
         {{ form.password }}
-        <br>
+        <br><br>
         {{ form.submit }}
     </form>
     <br><br>
     <a href="{{ url_for('users.login') }}">Already have an account? Log In</a>
+</div>
 </body>
 
 </html>
