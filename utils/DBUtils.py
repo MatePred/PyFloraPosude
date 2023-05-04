@@ -31,13 +31,17 @@ class DBUtils:
 
     @staticmethod
     def findByName(clazz, name):
-        return clazz.query.filter_by(username=name).one_or_none()
-
+        if hasattr(clazz, 'username'):
+            return clazz.query.filter_by(username=name).one_or_none()
+        elif hasattr(clazz, 'name'):
+            return clazz.query.filter_by(name=name).one_or_none()
+        else:
+            return None
 
     @staticmethod
     def deleteById(clazz, id):
         model = DBUtils.findById(clazz, id)
-        if model is not None and model.user_type != UserTypeEnum.ADMIN:
+        if model is not None:
             return DBUtils.delete(model)
         else:
             return False
@@ -45,7 +49,7 @@ class DBUtils:
     @staticmethod
     def deleteByName(clazz, name):
         model = DBUtils.findByName(clazz, name)
-        if model is not None and model.user_type != UserTypeEnum.ADMIN:
+        if model is not None:
             return DBUtils.delete(model)
         else:
             return False

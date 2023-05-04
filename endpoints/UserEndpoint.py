@@ -41,9 +41,11 @@ class RegisterForm(FlaskForm):
 
 
 class ModifyUserForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"},default='JohnDoe')
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"},
+                           default='JohnDoe')
     password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
     submit = SubmitField('Izmjeni')
+
 
 def modifyUser(user_data, usernameToModify):
     # check if modified username allready is used in database
@@ -57,6 +59,7 @@ def modifyUser(user_data, usernameToModify):
         userService.updateUser(json.dumps(user_data), user_to_mod['id'])
     else:
         print("Username allready exist.")
+
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[
@@ -127,7 +130,7 @@ class UserEndpoint:
     def listaPosuda():
         if request.method == 'POST':
             if 'SbmBtn_UserProfile' in request.form:
-                #return render_template('modifyProfile.html', current_user=current_user.username)
+                # return render_template('modifyProfile.html', current_user=current_user.username)
                 return redirect(url_for('users.modifyProfile'))
         return render_template('listaPosuda.html', current_user=current_user.username)
 
@@ -144,6 +147,7 @@ class UserEndpoint:
                     'pwd': hashed_password
                 }
                 modifyUser(user_data, current_user.username)
+                return redirect(url_for('users.logout'))
 
         return render_template('modifyProfile.html', current_user=current_user.username, form=form)
 
@@ -153,43 +157,32 @@ class UserEndpoint:
     def adminPanel():
         # ucitaj sve usere iz baze u listu i predaj ju templateu
 
-        selected_option = None
+        selected_name = None
         form = ModifyUserForm()
 
         # print(request.method)
         if request.method == 'POST':
             if 'option' in request.form:
-                selected_option = request.form['option']
+                selected_name = request.form['option']
 
-            if form.validate_on_submit() and selected_option is not None:
+            if form.validate_on_submit() and selected_name is not None:
                 hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
                 user_data = {
                     'username': form.username.data,
                     'pwd': hashed_password
                 }
-                # # check if modified username allready is used in database
-                # # but not in a user you want to mofiy - in that way you are able
-                # # to modify password only
-                # usernames = userService.getAllUsersNames()
-                # usernames.remove(selected_option)
-                #
-                # if user_data['username'] not in usernames:
-                #     user_to_mod = userService.getUserByName(selected_option)
-                #     userService.updateUser(json.dumps(user_data), user_to_mod['id'])
-                # else:
-                #     print("Username allready exist.")
 
-                modifyUser(user_data, selected_option)
+                modifyUser(user_data, selected_name)
 
             if 'SbmBtn_DeleteUser' in request.form:
-                if (selected_option):
-                    if selected_option != "administrator":
-                        userService.deleteUserByName(selected_option)
-                    print(selected_option)
+                if (selected_name):
+                    if selected_name != "administrator":
+                        userService.deleteUserByName(selected_name)
+                    print(selected_name)
 
         options = userService.getAllUsersNames()
         options.remove("administrator")
-        return render_template('adminPanel.html', options=options, selected_option=selected_option, form=form)
+        return render_template('adminPanel.html', options=options, selected_option=selected_name, form=form)
 
     @staticmethod
     @users.route('/logout', methods=['GET', 'POST'])

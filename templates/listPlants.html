@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plantPages.css') }}">
+</head>
+
+<body>
+
+<div class="top-section">
+    <!-- content goes here -->
+    <div style="position: absolute; right: 20px;">
+        <form method="post">
+            <input type="submit" name="SbmBtn_UserProfile" value={{current_user}}
+                   style="width: 100px; height: 30px;">
+        </form>
+    </div>
+    <div style="text-align: center; font-size: 12px;">
+        <h1>PyFloraPosude</h1>
+    </div>
+
+    <div style="text-align: center;">
+        <h1>Lista Biljaka</h1>
+    </div>
+    <div style="position: absolute; right: 0;">
+        <a href="{{url_for('users.logout')}}">Press here to logout</a>
+    </div>
+
+</div>
+
+<div class="parent-box">
+    <h1>Podaci o biljci</h1>
+    <div class="child-box">
+        <img src="..imgs/suncokret/suncokret.jpg" alt="My Image">
+    </div>
+</div>
+
+<div class="parent-box">
+    <h1>Podaci o biljci</h1>
+    <div class="child-box">
+        <img src="{{ url_for('static', filename='imgs/kaktus/kaktus.jfif') }}" alt="My Image">
+    </div>
+</div>
+
+<div class="parent-box">
+    <h1>Podaci o biljci</h1>
+    <div class="child-box">
+        <img src="{{ url_for('static', filename='suncokret.jpg') }}" alt="My Image">
+    </div>
+</div>
+
+</body>
+
+</html>

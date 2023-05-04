@@ -3,12 +3,6 @@ from datetime import datetime as dt
 from datasource.entity.UserType import UserTypeEnum
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
-
-#class User(db.Model, UserMixin):
-#    id = db.Column(db.Integer, primary_key=True)
-#    username = db.Column(db.String(20), nullable=False, unique=True)
-#    password = db.Column(db.String(80), nullable=False)
-
 class User(db.Model, UserMixin):
 
     __tablename__ = 'user'

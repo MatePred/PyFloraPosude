@@ -16,4 +16,6 @@ app.config.from_object(DevConfig)
 db = SQLAlchemy(app)
 
 from endpoints.UserEndpoint import users
-app.register_blueprint(users, url_prefix="/users")
+from endpoints.PlantEndpoint import plants
+app.register_blueprint(users, url_prefix="/")
+app.register_blueprint(plants, url_prefix="/plants")

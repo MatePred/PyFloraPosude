@@ -4,6 +4,8 @@ from datasource.entity.UserType import UserType, UserTypeEnum
 from datasource.entity.User import User
 from datasource.dto.UserDto import UserDto
 from flask_bcrypt import Bcrypt
+from datasource.entity.Plant import Plant
+from datasource.dto.PlantDto import PlantDto
 
 class InitializeService:
 
@@ -48,9 +50,17 @@ class InitializeService:
             administratorDTO.pwd = bcrypt.generate_password_hash("12345678").decode("utf-8")
             administrator = User.createAdminUserFromDto(administratorDTO)
 
+            #dodaj biljku
+            plant1_DTO : PlantDto = PlantDto()
+            plant1_DTO.name = "kaktus"
+            plant1_DTO.photoURL = "imgs/kaktus/kaktus.jfif"
+            plant1: Plant = Plant.createPlantFromDto(plant1_DTO)
+
+
             #print(administrator)
             cl.add_params("insert-user-types", admin, user)
             cl.add_params("insert-admin", administrator)
+            cl.add_params("insert-plant", plant1)
 
             # allTypes = UserType.query.all()
             # for type in allTypes:
