@@ -60,7 +60,6 @@ class PlantService:
     def deletePlantByName(self, name):
         return DBUtils.deleteByName(Plant, name)
 
-
     def updateUser(self, userData, id):
         plantDto: PlantDto = PlantDto().serialize(userData, ignoreProperties=False)
         plant: Plant = DBUtils.findById(Plant, id)

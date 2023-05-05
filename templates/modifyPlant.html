@@ -11,8 +11,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='plantPages.css') }}">
 </head>
 
-<body>
-
 <div class="top-section">
     <!-- content goes here -->
     <div style="position: absolute; right: 20px;">
@@ -26,31 +24,31 @@
     </div>
 
     <div style="text-align: center;">
-        <h1>Biljka</h1>
+        <h1>Ažuriraj biljku</h1>
     </div>
     <div style="position: absolute; right: 0;">
         <a href="{{url_for('users.logout')}}">Press here to logout</a>
     </div>
 
 </div>
+<h1>{{plantName}}</h1>
 
-<div style="position: absolute; right: 40px; top:200px">
-    <form method="post">
-        <input type="submit" name="SbmBtn_ModifyPlant" value=Ažuriraj
-               style="width: 100px; height: 30px;">
-    </form>
-</div>
-
-<div class="plant-infos">
+<div>
     <form method="POST" action="">
-        <h1> {{ infos.name }} </h1>
-        <br>
-        {{ infos.message }}
+        {{ modifyPLantForm.name }}
+        <br><br>
+        {{ modifyPLantForm.photoURL }}
+        <br><br>
+        {{ modifyPLantForm.humidityValue }}
+        <br><br>
+        {{ modifyPLantForm.tempValue }}
+        <br><br>
+        {{ modifyPLantForm.lightValue }}
+        <br><br><br><br>
+        <input type="submit" name="SbmBtn_ModifyPlant" value=modifyPLantForm.name >
+        <br><br>
+        <input type="submit" name="SbmBtn_DeletePlant" value=modifyPLantForm.name >
     </form>
-</div>
-
-<div class="plant-box" style="...">
-    <img src="{{ url_for('static', filename=infos.photoURL) }}" alt="My Image">
 </div>
 
 </body>
