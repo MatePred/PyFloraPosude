@@ -18,10 +18,11 @@ plantService = PlantService()
 
 class PlantInfos(FlaskForm):
         name = "imeBiljke"
-        photoURL = TextAreaField('/')
-        humidityValue = TextAreaField('Message')
-        tempValue = TextAreaField('Message')
-        lightValue = TextAreaField('Message')
+        photoURL = "photoURL"
+        humidityValue = "humidityValue"
+        tempValue = "tempValue"
+        lightValue = "lightValue"
+
 class ModifyPLantForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()], render_kw={"placeholder": "Plant name"})
     photoURL = StringField('photoURL', validators=[DataRequired()], render_kw={"placeholder": "Photo URL"})
@@ -39,33 +40,37 @@ class PlantEndpoint:
     @staticmethod
     @plants.route('/plant', methods=['GET', 'POST'])
     def plant():
-        selectedPlant = "kaktus"
+        #ID biljke dobijemo sa stranice "Plant list"
+        selectedPlant = 1
 
         if request.method == 'POST':
             if 'SbmBtn_ModifyPlant' in request.form:
                 flash(selectedPlant)
                 return redirect(url_for('plants.modifyPlant'))
 
-        data = plantService.getAllPlants()
         infos = PlantInfos();
 
-        infos.name = data[0]['name']
-        infos.message = data[0]['name'] + "\n" + \
-                        data[0]['photoURL']
+        #data = plantService.getAllPlants()
+        #infos.name = data[0]['name']
+        #infos.photoURL = data[0]['photoURL']
 
         plantDto = plantService.getPlantById(1)
-        plantDto = plantService.getPlantByName("kaktus")
+        #plantDto = plantService.getPlantByName("kaktus")
+
+
         plantData = {
                         'name': 'suncokret',
                         'photoURL': '/'
                     }
         #plantService.createPlant(json.dumps(plantData))
-        #plantService.deletePlantById(2)
-        plantService.deletePlantByName("suncokret")
+
+
+        #plantService.deletePlantByName("suncokret")
+
         infos.name = plantDto['name']
         infos.photoURL = plantDto['photoURL']
 
-        print(json.dumps(data, indent=4))
+        #print(json.dumps(data, indent=4))
         #infos.message = json.dumps(data, indent=4)
         return render_template('plant.html', infos=infos)
 
@@ -73,19 +78,40 @@ class PlantEndpoint:
     @staticmethod
     @plants.route('/modify', methods=['GET', 'POST'])
     def modifyPlant():
-        plant_ID = 0
+        plant_ID = 1
         if len(get_flashed_messages()) > 0:
             plant_ID = get_flashed_messages()[0]
+        else:
+            plant_ID = 1
+        plant_ID = 1
+
+
         #get plant from database by ID
+        plantData = plantService.getPlantById(plant_ID)
+
         modifyPLantForm: ModifyPLantForm = ModifyPLantForm();
-        modifyPLantForm.name.data = "Kaktus"
+        modifyPLantForm.name.data = plantData["name"]
+        modifyPLantForm.photoURL.data = plantData["photoURL"]
+        modifyPLantForm.humidityValue.data = plantData["humidityValue"]
+        modifyPLantForm.tempValue.data = plantData["tempValue"]
+        modifyPLantForm.lightValue.data = plantData["lightValue"]
 
         if request.method == 'POST':
             if 'SbmBtn_ModifyPlant' in request.form:
                 #modify plant and update db
-                print("Modify plant")
+                plant_data = {
+                    "name": request.form['name'],
+                    "photoURL": request.form['photoURL'],
+                    "humidityValue": request.form['humidityValue'],
+                    "tempValue": request.form['tempValue'],
+                    "lightValue": request.form['lightValue']
+                }
+                plantService.updatePlant(json.dumps(plant_data), plant_ID)
+                return redirect(url_for('plants.modifyPlant'))
+                #print("Modify plant")
             if 'SbmBtn_DeletePlant' in request.form:
                 print("Delete plant")
+                #plantService.deletePlantById(plant_ID)
                 return redirect(url_for('plants.listPlants'))
 
-        return render_template('modifyPlant.html', plantName=plant_ID,modifyPLantForm=modifyPLantForm)
+        return render_template('modifyPlant.html', plantName=plantData["name"],modifyPLantForm=modifyPLantForm)

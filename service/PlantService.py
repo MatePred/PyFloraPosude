@@ -60,20 +60,31 @@ class PlantService:
     def deletePlantByName(self, name):
         return DBUtils.deleteByName(Plant, name)
 
-    def updateUser(self, userData, id):
+    def updatePlant(self, userData, id):
         plantDto: PlantDto = PlantDto().serialize(userData, ignoreProperties=False)
         plant: Plant = DBUtils.findById(Plant, id)
-        # dohvatite token po value-u
-        # provjerite toke.user_id == id
 
         updated = False
         if plant is not None:
-            if PlantDto.name is not None and plant.name != PlantDto.name:
-                plant.name = PlantDto.name
+
+            if plantDto.name is not None and plant.name != plantDto.name:
+                plant.name = plantDto.name
                 updated = True
 
-            if PlantDto.pwd is not None and plant.pwd != PlantDto.pwd:
-                plant.pwd = PlantDto.pwd
+            if plantDto.photoURL is not None and plant.photoURL != plantDto.photoURL:
+                plant.photoURL = plantDto.photoURL
+                updated = True
+
+            if plantDto.humidityValue is not None and plant.humidityValue != plantDto.humidityValue:
+                plant.humidityValue = plantDto.humidityValue
+                updated = True
+
+            if plantDto.tempValue is not None and plant.tempValue != plantDto.tempValue:
+                plant.tempValue = plantDto.tempValue
+                updated = True
+
+            if plantDto.lightValue is not None and plant.lightValue != plantDto.lightValue:
+                plant.lightValue = plantDto.lightValue
                 updated = True
 
             if updated:

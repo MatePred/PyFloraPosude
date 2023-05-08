@@ -31,3 +31,10 @@ img {
   position: absolute; top: 250px;
   position: absolute; left:250px;
 }
+
+.modifyPLant {
+ position: relative;
+  margin: 0 auto;
+  width: 500px; /* set the width of the parent box */
+  height: 300px; /* set the height of the parent box */
+}
