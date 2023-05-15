@@ -21,8 +21,8 @@ class Plant(db.Model):
         plant.name = dto.name
         plant.photoURL = dto.photoURL
         plant.humidityValue = dto.humidityValue
-        plant.tempValue = plant.tempValue
-        plant.lightValue = plant.lightValue
+        plant.tempValue = dto.tempValue
+        plant.lightValue = dto.lightValue
         return plant
 
 

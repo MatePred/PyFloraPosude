@@ -56,11 +56,26 @@ class InitializeService:
             plant1_DTO.photoURL = "imgs/kaktus/kaktus.jfif"
             plant1: Plant = Plant.createPlantFromDto(plant1_DTO)
 
+            plant2_DTO : PlantDto = PlantDto()
+            plant2_DTO.name = "kaktus2"
+            plant2_DTO.photoURL = "imgs/kaktus/kaktus.jfif"
+            plant2: Plant = Plant.createPlantFromDto(plant2_DTO)
+
+            plant3_DTO : PlantDto = PlantDto()
+            plant3_DTO.name = "suncokret1"
+            plant3_DTO.photoURL = "imgs/suncokret/suncokret.jog"
+            plant3: Plant = Plant.createPlantFromDto(plant3_DTO)
+
+            plant4_DTO : PlantDto = PlantDto()
+            plant4_DTO.name = "suncokret2"
+            plant4_DTO.photoURL = "imgs/suncokret/suncokret.jog"
+            plant4: Plant = Plant.createPlantFromDto(plant4_DTO)
+
 
             #print(administrator)
             cl.add_params("insert-user-types", admin, user)
             cl.add_params("insert-admin", administrator)
-            cl.add_params("insert-plant", plant1)
+            cl.add_params("insert-plant", plant1,plant2,plant3,plant4)
 
             # allTypes = UserType.query.all()
             # for type in allTypes:

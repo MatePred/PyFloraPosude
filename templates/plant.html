@@ -41,22 +41,33 @@
     </form>
 </div>
 
-<div class="plant-infos">
-    <form method="POST" action="">
-        <h1> {{ infos.name }} </h1>
-        <br><br>
-        {{ infos.photoURL }}
-        <br><br>
-        {{ infos.humidityValue }}
-        <br><br>
-        {{ infos.tempValue }}
-        <br><br>
-        {{ infos.lightValue }}
-    </form>
-</div>
 
 <div class="plant-box" style="...">
     <img src="{{ url_for('static', filename=infos.photoURL) }}" alt="My Image">
+</div>
+
+<div class="plant-infos">
+    <form method="POST" action="">
+        <div class="form-group">
+            <label for="plant-name">Name:</label> {{ infos.name }}
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="plant-photo">Photo URL:</label> {{ infos.photoURL }}
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="plant-humidity">Humidity Value:</label> {{ infos.humidityValue }}
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="plant-temp">Temperature Value:</label> {{ infos.tempValue }}
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="plant-light">Light Value:</label> {{ infos.lightValue }}
+        </div>
+    </form>
 </div>
 
 </body>

@@ -32,6 +32,11 @@ class PlantService:
             plantDtoList.append(PlantDto.createFromEntity(p).getJson())
         return plantDtoList
 
+    def getAllPlants2(self):
+        plantDtoList = []
+        plants = DBUtils.findAll(Plant)
+        return plants
+
     def getAllPlantNames(self):
         plantDtoList = []
         plants = DBUtils.findAll(Plant)

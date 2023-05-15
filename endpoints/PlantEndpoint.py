@@ -1,14 +1,12 @@
-from UserManagementApp import db, app
-from flask import Blueprint, request, jsonify, Response, flash,get_flashed_messages
+
+from flask import Blueprint, request, flash,get_flashed_messages
 from flask import Flask, render_template, url_for, redirect
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField,TextAreaField
-from wtforms.validators import InputRequired, Length, ValidationError
+from wtforms import StringField
 from service.PlantService import PlantService
 import json
 from wtforms.validators import DataRequired
-from datasource.dto import PlantDto
-from wtforms.widgets import TextArea
+
 
 plants = Blueprint('plants', __name__)
 
@@ -23,6 +21,9 @@ class PlantInfos(FlaskForm):
         tempValue = "tempValue"
         lightValue = "lightValue"
 
+        def createFromDto(self):
+            pass
+
 class ModifyPLantForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()], render_kw={"placeholder": "Plant name"})
     photoURL = StringField('photoURL', validators=[DataRequired()], render_kw={"placeholder": "Photo URL"})
@@ -33,9 +34,33 @@ class ModifyPLantForm(FlaskForm):
 class PlantEndpoint:
 
     @staticmethod
-    @plants.route('/')
+    @plants.route('/' ,methods=['GET', 'POST'])
     def listPlants():
-        return render_template('listPlants.html')
+        plantsList = plantService.getAllPlants2()
+        if request.method == 'POST':
+            if 'SbmBtn_AddPlant' in request.form:
+                return redirect(url_for('plants.createPlant'))
+        return render_template('listPlants.html', plantsList=plantsList)
+
+    @staticmethod
+    @plants.route('/createPlant',methods=['GET', 'POST'])
+    def createPlant():
+        modifyPLantForm: ModifyPLantForm = ModifyPLantForm()
+
+        if request.method == 'POST':
+            if 'SbmBtn_CreatePlant' in request.form:
+                #modify plant and update db
+                plantData = {
+                    "name": request.form['name'],
+                    "photoURL": request.form['photoURL'],
+                    "humidityValue": request.form['humidityValue'],
+                    "tempValue": request.form['tempValue'],
+                    "lightValue": request.form['lightValue']
+                }
+                plantService.createPlant(json.dumps(plantData))
+                #plantService.updatePlant(json.dumps(plant_data), plant_ID)
+                return redirect(url_for('plants.listPlants'))
+        return render_template('createPlant.html',modifyPLantForm=modifyPLantForm)
 
     @staticmethod
     @plants.route('/plant', methods=['GET', 'POST'])
@@ -69,6 +94,9 @@ class PlantEndpoint:
 
         infos.name = plantDto['name']
         infos.photoURL = plantDto['photoURL']
+        infos.humidityValue = plantDto['humidityValue']
+        infos.tempValue = plantDto['tempValue']
+        infos.lightValue = plantDto['lightValue']
 
         #print(json.dumps(data, indent=4))
         #infos.message = json.dumps(data, indent=4)
@@ -115,3 +143,8 @@ class PlantEndpoint:
                 return redirect(url_for('plants.listPlants'))
 
         return render_template('modifyPlant.html', plantName=plantData["name"],modifyPLantForm=modifyPLantForm)
+
+    @staticmethod
+    @plants.route('/createPlant', methods=['GET', 'POST'])
+    def CreatePlant(self):
+        pass
