@@ -95,7 +95,7 @@ class UserEndpoint:
                             return redirect(url_for('users.adminPanel'))
                         else:
                             return redirect(url_for('plants.listPlants'))
-                        log = ""
+                            log = ""
                     else:
                         print("Incorrect password!")
                         log = "Incorrect password!"
@@ -106,7 +106,7 @@ class UserEndpoint:
             else:
                 print("User does not exist!")
                 log = "User does not exist!"
-        return render_template('login.html', form=form, variable=log)
+        return render_template('UserTemplates/login.html', form=form, variable=log)
 
     @staticmethod
     @users.route('/register', methods=['GET', 'POST'])
@@ -122,7 +122,7 @@ class UserEndpoint:
             new_user = userService.createUser(json.dumps(user_data))
             return redirect(url_for('users.login'))
 
-        return render_template('register.html', form=form)
+        return render_template('UserTemplates/register.html', form=form)
 
     @staticmethod
     @users.route('/listaPosuda', methods=['GET', 'POST'])
@@ -149,7 +149,7 @@ class UserEndpoint:
                 modifyUser(user_data, current_user.username)
                 return redirect(url_for('users.logout'))
 
-        return render_template('modifyProfile.html', current_user=current_user.username, form=form)
+        return render_template('UserTemplates/modifyProfile.html', current_user=current_user.username, form=form)
 
     @staticmethod
     @users.route('/adminPanel', methods=['GET', 'POST'])
@@ -182,7 +182,7 @@ class UserEndpoint:
 
         options = userService.getAllUsersNames()
         options.remove("administrator")
-        return render_template('adminPanel.html', options=options, selected_option=selected_name, form=form)
+        return render_template('UserTemplates/adminPanel.html', options=options, selected_option=selected_name, form=form)
 
     @staticmethod
     @users.route('/logout', methods=['GET', 'POST'])

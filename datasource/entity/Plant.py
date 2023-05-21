@@ -1,7 +1,5 @@
 from UserManagementApp import db
-from datetime import datetime as dt
 from datasource.dto.PlantDto import PlantDto
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 class Plant(db.Model):
 

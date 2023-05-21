@@ -32,6 +32,15 @@
         <a href="{{url_for('users.logout')}}">Press here to logout</a>
     </div>
 
+    <script>
+    window.reshowing = function(event) {
+      if (event.persisted) {
+        // Page is loaded from cache, so refresh it
+        window.location.reload();
+      }
+    };
+    </script>
+
 </div>
 
 <div class="plant-grid">
@@ -39,12 +48,11 @@
     <div class="plant-box2">
         <div class="child-box">
             <h1 style="text-align: center;">Dodaj novu biljku</h1>
-            <br>
-            <br>
-            <br>
-            <div class="PlusBtn" >
-                <form method="post"  style="width: 100%; height: 100%;">
-                    <input style="width: 100%; height: 100%;font-size: 60px;" type="submit" name="SbmBtn_AddPlant"  value="+">
+            <br><br><br>
+            <div class="PlusBtn">
+                <form method="post" style="width: 100%; height: 100%;">
+                    <input style="width: 100%; height: 100%;font-size: 60px;" type="submit" name="SbmBtn_AddPlant"
+                           value="+">
                 </form>
             </div>
         </div>
@@ -55,6 +63,12 @@
         <div class="child-box">
             <h1>Podaci o biljci</h1>
             <h1>{{ p.name }}</h1>
+            <div class="PlusBtn">
+                <form method="post" style="width: 100%; height: 100%;">
+                    <input style="width: 100%; height: 50%;font-size: 60px;" type="submit" name={{ p.name }}
+                           value="+">
+                </form>
+            </div>
         </div>
         <div class="child-box">
             <img src="{{ url_for('static', filename=p.photoURL) }}" alt={{ p.photoURL }}>

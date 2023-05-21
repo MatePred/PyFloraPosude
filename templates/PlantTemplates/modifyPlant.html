@@ -30,6 +30,14 @@
         <a href="{{url_for('users.logout')}}">Press here to logout</a>
     </div>
 
+    <script>
+    window.reshowing = function(event) {
+      if (event.persisted) {
+        // Page is loaded from cache, so refresh it
+        window.location.reload();
+      }
+    };
+    </script>
 </div>
 <h1 class="plantName">{{plantName}}</h1>
 

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyPosudList</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pyPosudePages.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='general.css') }}">
+</head>
+
+<body>
+
+<div class="top-section">
+    <!-- content goes here -->
+    <div style="position: absolute; right: 20px;">
+        <form method="post">
+            <input type="submit" name="SbmBtn_UserProfile" value={{current_user}}
+                   style="width: 100px; height: 30px;">
+        </form>
+    </div>
+    <div style="text-align: center; font-size: 12px;">
+        <h1>PyFloraPosude</h1>
+    </div>
+
+    <div style="text-align: center;">
+        <h1>Lista PyFloraPosuda</h1>
+    </div>
+    <div style="position: absolute; right: 0;">
+        <a href="{{url_for('users.logout')}}">Press here to logout</a>
+    </div>
+
+    <script>
+    window.reshowing = function(event) {
+      if (event.persisted) {
+        // Page is loaded from cache, so refresh it
+        window.location.reload();
+      }
+    };
+    </script>
+
+</div>
+
+<div class="posude-grid">
+
+    <div class="pyPosuda-box">
+        <div class="child-box">
+            <h1 class="text-large" style="text-align: center;">Dodaj novu posudu</h1>
+            <br><br><br>
+            <div class="PlusBtn">
+                <form method="post" style="width: 100%; height: 100%;">
+                    <input style="width: 100%; height: 100%;font-size: 60px;" type="submit" name="SbmBtn_AddPosuda"
+                           value="+">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% for p in pyPosudaInfoList %}
+    <div class="pyPosuda-box">
+        <div class="child-box">
+            <h1 class="text-large">Podaci o PyPosudi</h1text-large>
+            <h1 class="text-medium">Ime: {{ p.name }}</h1>
+            <h1 class="text-medium">Status: {{ p.status }}</h1>
+            <div class="PlusBtn">
+                <form method="post" style="width: 100%; height: 100%;">
+                    <input style="width: 100%; height: 50%;font-size: 60px;" type="submit" name={{ p.name }}
+                           value="+">
+                </form>
+            </div>
+        </div>
+        <div class="child-box">
+            <img src="{{ url_for('static', filename=p.biljkaDto.photoURL) }}" alt={{ p.biljkaDto.photoURL }}>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+</body>
+
+
+</html>

@@ -1,0 +1,51 @@
+img {
+  width: 100%; /* set the width of the image to fill the child box */
+  height: 100%; /* set the height of the image to fill the child box */
+  object-fit: scale-down; /* scale the image to cover the entire child box */
+}
+
+
+
+
+.posude-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* adjust the min and max width to your needs */
+    gap: 20px; /* adjust the gap size to your needs */
+}
+
+.pyPosuda-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 400px; /* set the width of the parent box */
+  height: 400px; /* set the height of the parent box */
+  background-color: #ccc; /* set the background color of the parent box */
+  padding: 20px; /* add some padding to the parent box */
+  margin: 0 auto;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.child-box {
+    margin: 10px;
+}
+
+.child-box {
+  margin: auto;
+  border: 1px solid black;
+  width: 200px; /* set the width of the child box */
+  height: 300px; /* set the height of the child box */
+  background-color: #fff; /* set the background color of the child box */
+  padding: 10px; /* add some padding to the child box */
+}
+
+.PlusBtn{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  height: 100px;
+  width:auto;
+  display: flex;
+  flex-grow: 1;
+  justify-content: center;
+  align-items: center;
+}

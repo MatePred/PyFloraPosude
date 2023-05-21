@@ -6,6 +6,7 @@ from datasource.dto.UserDto import UserDto
 from flask_bcrypt import Bcrypt
 from datasource.entity.Plant import Plant
 from datasource.dto.PlantDto import PlantDto
+from datasource.entity.PyFloraPosuda import PyFloraPosuda
 
 class InitializeService:
 
@@ -42,6 +43,10 @@ class InitializeService:
             admin.type = UserTypeEnum.ADMIN.value
             admin.name = UserTypeEnum.ADMIN.name.lower()
 
+            posuda = PyFloraPosuda()
+            posuda.name = "test"
+
+
             #add administrator account to the table,
             #cannot be deleted
             administratorDTO = UserDto()
@@ -76,6 +81,7 @@ class InitializeService:
             cl.add_params("insert-user-types", admin, user)
             cl.add_params("insert-admin", administrator)
             cl.add_params("insert-plant", plant1,plant2,plant3,plant4)
+            cl.add_params("insert-posuda", posuda)
 
             # allTypes = UserType.query.all()
             # for type in allTypes:

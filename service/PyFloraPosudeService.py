@@ -1,48 +1,47 @@
 from datasource.dto.PlantDto import PlantDto
 from datasource.entity.Plant import Plant
-from UserManagementApp import db
 from utils.DBUtils import DBUtils
-import uuid
+from datasource.dto.PyFloraPosudaDto import PyFloraPosudaDto
+from datasource.entity.PyFloraPosuda import PyFloraPosuda
 
 
-class PlantService:
+class PyFloraPosudeService:
 
     def __init__(self):
         pass
 
-    def createPlant(self, plantData):
-        print(plantData)
-        plantDto = PlantDto().serialize(plantData, ignoreProperties=False)
-        print(plantDto)
-        plant = Plant.createPlantFromDto(plantDto)
-        plant = DBUtils.insert(plant)
-        if plant is not None:
-            newPantDto = PlantDto.createFromEntity(plant)
+    def createPyPosuda(self, pyPosudaData):
+        print(pyPosudaData)
+        pyFloraPosudaDto = PyFloraPosudaDto().serialize(pyPosudaData, ignoreProperties=False)
+        print(pyFloraPosudaDto)
+        posuda = PyFloraPosuda.createPyPosudaFromDto(pyFloraPosudaDto)
+        posuda = DBUtils.insert(posuda)
+        if posuda is not None:
+            newPosudaDto = PyFloraPosudaDto.createFromEntity(posuda)
             # userType = userTypeService.getUserTypeByType(1)
             # newUserDto.userType = userType.name
-            return newPantDto.getJson()
+            return newPosudaDto.getJson()
 
         return None
 
+    #radi
+    def getAllPyPosuda(self):
+        pyPosudaDtoList = []
+        pyFloraPosuda = DBUtils.findAll(PyFloraPosuda)
+        for p in pyFloraPosuda:
+            pyPosudaDtoList.append(PyFloraPosudaDto.createFromEntity(p).getJson())
+        return pyPosudaDtoList
 
-    def getAllPlants(self):
-        plantDtoList = []
-        plants = DBUtils.findAll(Plant)
-        for p in plants:
-            plantDtoList.append(PlantDto.createFromEntity(p).getJson())
-        return plantDtoList
+    def getAllPyPosuda2(self):
+        pyFloraPosuda = DBUtils.findAll(PyFloraPosuda)
+        return pyFloraPosuda
 
-    def getAllPlants2(self):
-        plantDtoList = []
-        plants = DBUtils.findAll(Plant)
-        return plants
-
-    def getAllPlantNames(self):
-        plantDtoList = []
-        plants = DBUtils.findAll(Plant)
-        for p in plants:
-            plantDtoList.append(PlantDto.createFromEntity(p).name)
-        return plantDtoList
+    def getAllPyPosudeNames(self):
+        pyPosudeDtoList = []
+        pyPosude = DBUtils.findAll(PyFloraPosuda)
+        for p in pyPosude:
+            pyPosudeDtoList.append(PyFloraPosudaDto.createFromEntity(p).name)
+        return pyPosudeDtoList
 
 
     def getPlantById(self, id):
@@ -52,10 +51,10 @@ class PlantService:
 
         return None
 
-    def getPlantByName(self, name):
-        plant = Plant.query.filter_by(name=name).first()
-        if plant is not None:
-            return PlantDto.createFromEntity(plant).getJson()
+    def getPyPosudaByName(self, name):
+        pyPosuda = PyFloraPosuda.query.filter_by(name=name).first()
+        if pyPosuda is not None:
+            return PyFloraPosudaDto.createFromEntity(pyPosuda).getJson()
 
         return None
 
