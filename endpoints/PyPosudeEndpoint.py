@@ -1,13 +1,11 @@
 from flask import Blueprint, request, session, render_template
 from flask import Flask, render_template, url_for, redirect
-from flask_wtf import FlaskForm
-from wtforms import StringField
 from service.PlantService import PlantService
 from datasource.dto.PlantDto import PlantDto
 from service.PyFloraPosudeService import PyFloraPosudeService
 from datasource.entity.PyFloraPosuda import PyFloraPosuda
 import json
-from wtforms.validators import DataRequired
+from forms.CreatePyPosudaForm import CreatePyPosudaForm
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 pyPosude = Blueprint('pyPosude', __name__)
@@ -32,7 +30,6 @@ class PyPosudeEndpoint:
     def listPyPosude():
         pyPosudeList:PyFloraPosuda = pyPosudeService.getAllPyPosuda2()
 
-
         pyPosudaInfoList = []
         for p in pyPosudeList:
             pPinfo = PyPosudaInfo()
@@ -45,7 +42,7 @@ class PyPosudeEndpoint:
         if request.method == 'POST':
             #add new pyPosuda
             if 'SbmBtn_AddPosuda' in request.form:
-                return redirect(url_for('plants.createPlant'))
+                return redirect(url_for('pyPosude.createPyPosuda'))
 
             #if some of the other buttons pressed
             keys = request.form.keys()
@@ -58,43 +55,41 @@ class PyPosudeEndpoint:
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
 
-        # # testiranje
-        # pyPosudaData = {
-        #     "name": "dsads",
-        #     "plant_id": 1
-        # }
-        #
-        #
-        # pyFloraPosudeService = PyFloraPosudeService()
-        # pyFloraPosudeService.createPyPosuda(pyPosudaData)
-        # print(pyFloraPosudeService.getAllPyPosuda())
-
         return render_template('PyPosudeTemplates/listPyPosude.html', pyPosudaInfoList=pyPosudaInfoList)
-    #
-    # @staticmethod
-    # @pyPosude.route('/createPlant',methods=['GET', 'POST'])
-    # @login_required
-    # def createPlant():
-    #     modifyPLantForm: ModifyPLantForm = ModifyPLantForm()
-    #
-    #     if request.method == 'POST':
-    #         if 'SbmBtn_CreatePlant' in request.form:
-    #             #modify plant and update db
-    #             plantData = {
-    #                 "name": request.form['name'],
-    #                 "photoURL": request.form['photoURL'],
-    #                 "humidityValue": request.form['humidityValue'],
-    #                 "tempValue": request.form['tempValue'],
-    #                 "lightValue": request.form['lightValue']
-    #             }
-    #             plantService.createPlant(json.dumps(plantData))
-    #             #after plant creation get back to the plant list
-    #             return redirect(url_for('plants.listPlants'))
-    #
-    #         if 'SbmBtn_UserProfile' in request.form:
-    #             return redirect(url_for('users.modifyProfile'))
-    #
-    #     return render_template('PlantTemplates/createPlant.html',modifyPLantForm=modifyPLantForm,current_user=current_user.username)
+
+    @staticmethod
+    @pyPosude.route('/createPyPosuda',methods=['GET', 'POST'])
+    #@login_required
+    def createPyPosuda():
+        createPyPosudaForm: CreatePyPosudaForm = CreatePyPosudaForm()
+        plant_names = plantService.getAllPlantNames()
+        plant_names.insert(0,"None")
+        createPyPosudaForm.plant_name.choices = [(plant_name, plant_name) for plant_name in plant_names]
+
+        if request.method == 'POST':
+            if 'SbmBtn_UserProfile' in request.form:
+                return redirect(url_for('users.modifyProfile'))
+
+            if 'SbmBtn_CreatePyPosuda' in request.form:
+                #modify plant and update db
+                selected_plant_name = createPyPosudaForm.plant_name.data
+                data = plantService.getPlantByName(selected_plant_name)
+                # dumps the json object into an element
+                json_str = json.dumps(data)
+                # load the json to a string
+                resp = json.loads(json_str)
+                selected_plant_id = resp['id']
+
+                pyPosudaData = {
+                    "name": request.form['name'],
+                    "plant_id": selected_plant_id
+                }
+
+                pyPosudeService.createPyPosuda(pyPosudaData)
+
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+        return render_template('PyPosudeTemplates/createPyPosuda.html',createPyPosudaForm=createPyPosudaForm,current_user=current_user.username)
     #
     # @staticmethod
     # @pyPosude.route('/plant', methods=['GET', 'POST'])

@@ -38,11 +38,11 @@ class PlantService:
         return plants
 
     def getAllPlantNames(self):
-        plantDtoList = []
+        plantNamesList = []
         plants = DBUtils.findAll(Plant)
         for p in plants:
-            plantDtoList.append(PlantDto.createFromEntity(p).name)
-        return plantDtoList
+            plantNamesList.append(PlantDto.createFromEntity(p).name)
+        return plantNamesList
 
 
     def getPlantById(self, id):

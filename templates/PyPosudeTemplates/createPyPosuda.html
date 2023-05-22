@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plantPages.css') }}">
+</head>
+
+<div class="top-section">
+    <!-- content goes here -->
+    <div style="position: absolute; right: 20px;">
+        <form method="post">
+            <input type="submit" name="SbmBtn_UserProfile" value={{current_user}}
+                   style="width: 100px; height: 30px;">
+        </form>
+    </div>
+    <div style="text-align: center; font-size: 12px;">
+        <h1>PyFloraPosude</h1>
+    </div>
+
+    <div style="text-align: center;">
+        <h1>Stvori PyFloraPosuda</h1>
+    </div>
+    <div style="position: absolute; right: 0;">
+        <a href="{{url_for('users.logout')}}">Press here to logout</a>
+    </div>
+
+    <script>
+    window.reshowing = function(event) {
+      if (event.persisted) {
+        // Page is loaded from cache, so refresh it
+        window.location.reload();
+      }
+    };
+
+    </script>
+</div>
+
+<div class="modifyPlant">
+    <br><br>
+    <form method="POST" action="">
+        <div class="form-group">
+            <label for="plant-name">Name:</label> {{ createPyPosudaForm.name }}
+        </div>
+        <br><br>
+        <div class="form-group">
+            <label for="{{ createPyPosudaForm.plant_name.id }}">Plant</label>
+            {{ createPyPosudaForm.plant_name(class="form-control") }}
+        </div>
+        <br><br>
+        <div class="form-group-submit-buttons">
+            <input type="submit" name="SbmBtn_CreatePyPosuda" value="Create">
+        </div>
+    </form>
+</div>
+
+
+</body>
+
+</html>
