@@ -32,7 +32,7 @@
     <div style="position: absolute; right: 0;">
         <a href="{{url_for('users.logout')}}">Press here to logout</a>
     </div>
-
+    <br><br><br>
     <script>
     window.reshowing = function(event) {
       if (event.persisted) {
@@ -41,7 +41,12 @@
       }
     };
     </script>
-
+    <div>
+        <form method="post">
+            <input type="submit" name="SbmBtn_Sync" value=Sync
+                   style="width: 100px; height: 30px;">
+        </form>
+    </div>
 </div>
 
 <div class="posude-grid">

@@ -49,6 +49,7 @@ class PlantService:
         plant = DBUtils.findById(Plant, id)
         if plant is not None:
             return PlantDto.createFromEntity(plant).getJson()
+            #return PlantDto.createFromEntity(plant)
 
         return None
 

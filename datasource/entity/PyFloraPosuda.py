@@ -11,6 +11,7 @@ class PyFloraPosuda(db.Model):
 
 
 
+
     @staticmethod
     def createPyPosudaFromDto(dto: PlantDto):
         pyFloraPosuda: PyFloraPosuda = PyFloraPosuda()

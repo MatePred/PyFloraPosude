@@ -6,6 +6,7 @@ from service.PyFloraPosudeService import PyFloraPosudeService
 from datasource.entity.PyFloraPosuda import PyFloraPosuda
 import json
 from forms.CreatePyPosudaForm import CreatePyPosudaForm
+from service.SensorsService import SensorsPyPosuda, SensorsService
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 pyPosude = Blueprint('pyPosude', __name__)
@@ -14,12 +15,37 @@ pyPosude = Blueprint('pyPosude', __name__)
 
 plantService = PlantService()
 pyPosudeService = PyFloraPosudeService()
+sensorsService = SensorsService()
 
 
 class PyPosudaInfo():
-    name = None
-    status = None
-    biljkaDto: PlantDto = PlantDto()
+    def __init__(self):
+        self.name = None
+        self.status = None
+        self.biljkaDto: PlantDto = PlantDto()
+
+    def updateStatus(self, currTemp, currHum, currLight):
+        text = ""
+        if self.biljkaDto is None:
+            text = "nema biljke"
+        else:
+            if currTemp < self.biljkaDto['tempValue']:
+                text = text + "Grijati \n"
+            else:
+                text = "Temp ok \n"
+            if currLight < self.biljkaDto['lightValue']:
+                text = text + "Osvijetliti \n"
+            else:
+                text = text + "Svijetlo ok \n"
+            if currHum < self.biljkaDto['humidityValue']:
+                text = text + "Zaliti"
+            else:
+                text = text + "Vlaga ok"
+
+        self.status = text
+
+
+
 
 
 class PyPosudeEndpoint:
@@ -30,11 +56,27 @@ class PyPosudeEndpoint:
     def listPyPosude():
         pyPosudeList:PyFloraPosuda = pyPosudeService.getAllPyPosuda2()
 
+        #ucitati sve posude i stvoriti svakoj od njih senzor objekt,
+        #na sync button pozivati svaku zasebno
+
+        #MOZDA BI BILO BOLJE IMATI LOKALNU LISTU, TAKO CE SE LAKSE
+        #MODIFIKACIJE PROCITATI
+        for pyPosuda in pyPosudeList:
+            if sensorsService.getSensorsPyPosudaByName(pyPosuda.name) is None:
+                sensorsPyPosuda = SensorsPyPosuda(pyPosuda.name)
+                sensorsService.AddToList(sensorsPyPosuda)
+
         pyPosudaInfoList = []
         for p in pyPosudeList:
             pPinfo = PyPosudaInfo()
             pPinfo.name = p.name
             pPinfo.biljkaDto = plantService.getPlantById(p.plant_id)
+
+            tempData = sensorsService.getSensorsPyPosudaByName(p.name).tempData
+            humidityData = sensorsService.getSensorsPyPosudaByName(p.name).humidityData
+            lightData = sensorsService.getSensorsPyPosudaByName(p.name).lightData
+
+            pPinfo.updateStatus(tempData[-1],humidityData[-1],lightData[-1])
             pyPosudaInfoList.append(pPinfo)
 
         pyPosudeListNames = pyPosudeService.getAllPyPosudeNames()
@@ -54,6 +96,13 @@ class PyPosudeEndpoint:
 
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
+
+            if 'SbmBtn_Sync' in request.form:
+                sensorsService.SynchronizeAll()
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+
+
 
         return render_template('PyPosudeTemplates/listPyPosude.html', pyPosudaInfoList=pyPosudaInfoList)
 
