@@ -11,7 +11,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, log
 
 pyPosude = Blueprint('pyPosude', __name__)
 
-#bcrypt = Bcrypt(app)
+# bcrypt = Bcrypt(app)
 
 plantService = PlantService()
 pyPosudeService = PyFloraPosudeService()
@@ -45,22 +45,23 @@ class PyPosudaInfo():
         self.status = text
 
 
-
-
-
 class PyPosudeEndpoint:
-
+    showAllPosude = False
+    SbmBtn_ListAllPosudaState = "+"
     @staticmethod
-    @pyPosude.route('/',methods=['GET', 'POST'])
-    #@login_required
+    @pyPosude.route('/', methods=['GET', 'POST'])
+    # @login_required
     def listPyPosude():
-        pyPosudeList:PyFloraPosuda = pyPosudeService.getAllPyPosuda2()
+        # variable to swith between full and empty PyPosuda list
 
-        #ucitati sve posude i stvoriti svakoj od njih senzor objekt,
-        #na sync button pozivati svaku zasebno
 
-        #MOZDA BI BILO BOLJE IMATI LOKALNU LISTU, TAKO CE SE LAKSE
-        #MODIFIKACIJE PROCITATI
+        pyPosudeList: PyFloraPosuda = pyPosudeService.getAllPyPosuda2()
+
+        # ucitati sve posude i stvoriti svakoj od njih senzor objekt,
+        # na sync button pozivati svaku zasebno
+        # MOZDA BI BILO BOLJE IMATI LOKALNU LISTU, TAKO CE SE LAKSE
+        # MODIFIKACIJE PROCITATI
+        # ili jednostavno nakon modifikacije izbrisati pa dodatai ponovno u listu
         for pyPosuda in pyPosudeList:
             if sensorsService.getSensorsPyPosudaByName(pyPosuda.name) is None:
                 sensorsPyPosuda = SensorsPyPosuda(pyPosuda.name)
@@ -71,48 +72,55 @@ class PyPosudeEndpoint:
             pPinfo = PyPosudaInfo()
             pPinfo.name = p.name
             pPinfo.biljkaDto = plantService.getPlantById(p.plant_id)
-
             tempData = sensorsService.getSensorsPyPosudaByName(p.name).tempData
             humidityData = sensorsService.getSensorsPyPosudaByName(p.name).humidityData
             lightData = sensorsService.getSensorsPyPosudaByName(p.name).lightData
-
-            pPinfo.updateStatus(tempData[-1],humidityData[-1],lightData[-1])
-            pyPosudaInfoList.append(pPinfo)
+            pPinfo.updateStatus(tempData[-1], humidityData[-1], lightData[-1])
+            if PyPosudeEndpoint.showAllPosude is False:
+                if pPinfo.biljkaDto is not None:
+                    pyPosudaInfoList.append(pPinfo)
+            else:
+                pyPosudaInfoList.append(pPinfo)
 
         pyPosudeListNames = pyPosudeService.getAllPyPosudeNames()
 
         if request.method == 'POST':
-            #add new pyPosuda
+            # add new pyPosuda
             if 'SbmBtn_AddPosuda' in request.form:
                 return redirect(url_for('pyPosude.createPyPosuda'))
-
-            #if some of the other buttons pressed
-            keys = request.form.keys()
-            k = next(iter(keys))
-            if k in pyPosudeListNames:
-                p:PlantDto = pyPosudeService.getPyPosudaByName(k)
-                PyPosudeEndpoint.sharedVar = p['id']
-                return redirect(url_for('plants.plant'))
-
-            if 'SbmBtn_UserProfile' in request.form:
-                return redirect(url_for('users.modifyProfile'))
 
             if 'SbmBtn_Sync' in request.form:
                 sensorsService.SynchronizeAll()
                 return redirect(url_for('pyPosude.listPyPosude'))
 
+            if 'SbmBtn_ListAllPosuda' in request.form:
+                PyPosudeEndpoint.showAllPosude = not PyPosudeEndpoint.showAllPosude
+                if PyPosudeEndpoint.showAllPosude:
+                    PyPosudeEndpoint.SbmBtn_ListAllPosudaState = "-"
+                else:
+                    PyPosudeEndpoint.SbmBtn_ListAllPosudaState = "+"
+                return redirect(url_for('pyPosude.listPyPosude'))
 
+            if 'SbmBtn_UserProfile' in request.form:
+                return redirect(url_for('users.modifyProfile'))
 
+            # if some of the "+" buttons in PyPosuda are pressed, go to the PyPosuda page
+            keys = request.form.keys()
+            k = next(iter(keys))
+            if k in pyPosudeListNames:
+                p: PlantDto = pyPosudeService.getPyPosudaByName(k)
+                PyPosudeEndpoint.sharedVar = p['id']
+                return redirect(url_for('plants.plant'))
 
-        return render_template('PyPosudeTemplates/listPyPosude.html', pyPosudaInfoList=pyPosudaInfoList)
+        return render_template('PyPosudeTemplates/listPyPosude.html', pyPosudaInfoList=pyPosudaInfoList, SbmBtn_ListAllPosudaState=PyPosudeEndpoint.SbmBtn_ListAllPosudaState )
 
     @staticmethod
-    @pyPosude.route('/createPyPosuda',methods=['GET', 'POST'])
-    #@login_required
+    @pyPosude.route('/createPyPosuda', methods=['GET', 'POST'])
+    # @login_required
     def createPyPosuda():
         createPyPosudaForm: CreatePyPosudaForm = CreatePyPosudaForm()
         plant_names = plantService.getAllPlantNames()
-        plant_names.insert(0,"None")
+        plant_names.insert(0, "None")
         createPyPosudaForm.plant_name.choices = [(plant_name, plant_name) for plant_name in plant_names]
 
         if request.method == 'POST':
@@ -120,7 +128,7 @@ class PyPosudeEndpoint:
                 return redirect(url_for('users.modifyProfile'))
 
             if 'SbmBtn_CreatePyPosuda' in request.form:
-                #modify plant and update db
+                # modify plant and update db
                 selected_plant_name = createPyPosudaForm.plant_name.data
                 data = plantService.getPlantByName(selected_plant_name)
                 # dumps the json object into an element
@@ -134,11 +142,13 @@ class PyPosudeEndpoint:
                     "plant_id": selected_plant_id
                 }
 
+                # write to DB
                 pyPosudeService.createPyPosuda(pyPosudaData)
 
                 return redirect(url_for('pyPosude.listPyPosude'))
 
-        return render_template('PyPosudeTemplates/createPyPosuda.html',createPyPosudaForm=createPyPosudaForm,current_user=current_user.username)
+        return render_template('PyPosudeTemplates/createPyPosuda.html', createPyPosudaForm=createPyPosudaForm,
+                               current_user=current_user.username)
     #
     # @staticmethod
     # @pyPosude.route('/plant', methods=['GET', 'POST'])
