@@ -93,6 +93,13 @@ class PyPosudeEndpoint:
                 sensorsService.SynchronizeAll()
                 return redirect(url_for('pyPosude.listPyPosude'))
 
+            if 'SbmBtn_PyPosude' in request.form:
+                sensorsService.SynchronizeAll()
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
+
             if 'SbmBtn_ListAllPosuda' in request.form:
                 PyPosudeEndpoint.showAllPosude = not PyPosudeEndpoint.showAllPosude
                 if PyPosudeEndpoint.showAllPosude:
@@ -128,7 +135,7 @@ class PyPosudeEndpoint:
                 return redirect(url_for('users.modifyProfile'))
 
             if 'SbmBtn_CreatePyPosuda' in request.form:
-                # modify plant and update db
+                # create PyPosuda and update db
                 selected_plant_name = createPyPosudaForm.plant_name.data
                 data = plantService.getPlantByName(selected_plant_name)
                 # dumps the json object into an element
