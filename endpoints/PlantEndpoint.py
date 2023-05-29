@@ -46,6 +46,12 @@ class PlantEndpoint:
             if 'SbmBtn_AddPlant' in request.form:
                 return redirect(url_for('plants.createPlant'))
 
+            if 'SbmBtn_PyPosude' in request.form:
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
+
             #if some of the other buttons pressed
             keys = request.form.keys()
             k = next(iter(keys))
@@ -89,6 +95,12 @@ class PlantEndpoint:
                 #after plant creation get back to the plant list
                 return redirect(url_for('plants.listPlants'))
 
+            if 'SbmBtn_PyPosude' in request.form:
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
+
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
 
@@ -119,6 +131,12 @@ class PlantEndpoint:
 
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
+
+            if 'SbmBtn_PyPosude' in request.form:
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
 
         return render_template('PlantTemplates/plant.html', infos=infos,current_user=current_user.username)
 
@@ -160,5 +178,11 @@ class PlantEndpoint:
 
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
+
+            if 'SbmBtn_PyPosude' in request.form:
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
 
         return render_template('PlantTemplates/modifyPlant.html', plantName=plantData["name"],modifyPLantForm=modifyPLantForm,current_user=current_user.username)

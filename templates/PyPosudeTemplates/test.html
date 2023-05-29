@@ -1,46 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+<div>
+  <canvas id="myChart"></canvas>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='pyPosudePages.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='general.css') }}">
-</head>
-<body>
-<div class="top-section">
-    <!-- Left Section -->
-      <div style="float: left;">
-        <form method="post">
-            <input type="submit" name="SbmBtn_Sync" value="Sync1" style="width: 100px; height: 30px;">
-        </form>
-        <br><br><br><br>
-        <form method="post">
-            <input type="submit" name="SbmBtn_Sync" value="Sync2" style="width: 100px; height: 30px;">
-        </form>
-        <form method="post">
-            <input type="submit" name="SbmBtn_Sync" value="Sync" style="width: 100px; height: 30px;">
-        </form>
-      </div>
-
-    <!-- Middle Section -->
-    <div style="text-align: center;">
-        <h1>PyFloraPosude</h1>
-        <h1>Lista PyFloraPosuda</h1>
-    </div>
-
-    <!-- Right Section -->
-    <div style="text-align: right;">
-          <form method="post">
-            <input type="submit" name="SbmBtn_UserProfile" value="{{ current_user }}">
-          </form>
-
-          <a href="{{ url_for('users.logout') }}">Logout</a>
-    </div>
-
-    <div style="clear: both;"></div> <!-- Clear floating elements -->
+  <canvas id="myChart2"></canvas>
 </div>
 
-</body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('myChart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+      datasets: [{
+        label: '# of Votes',
+        data: [12, 19, 3, 5, 2, 3],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  const ctx2 = document.getElementById('myChart2');
+
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+      datasets: [{
+        label: '# of Votes',
+        data: [12, 19, 3, 5, 2, 3],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>

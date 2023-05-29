@@ -94,7 +94,7 @@ class UserEndpoint:
                         if user.user_type == UserTypeEnum.ADMIN.value:
                             return redirect(url_for('users.adminPanel'))
                         else:
-                            return redirect(url_for('plants.listPlants'))
+                            return redirect(url_for('pyPosude.listPyPosude'))
                             log = ""
                     else:
                         print("Incorrect password!")

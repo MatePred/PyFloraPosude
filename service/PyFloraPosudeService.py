@@ -44,10 +44,10 @@ class PyFloraPosudeService:
         return pyPosudeDtoList
 
 
-    def getPlantById(self, id):
-        plant = DBUtils.findById(Plant, id)
-        if plant is not None:
-            return PlantDto.createFromEntity(plant).getJson()
+    def getPyPosudaById(self, id):
+        pyFloraPosuda = DBUtils.findById(PyFloraPosuda, id)
+        if pyFloraPosuda is not None:
+            return PyFloraPosudaDto.createFromEntity(pyFloraPosuda).getJson()
 
         return None
 

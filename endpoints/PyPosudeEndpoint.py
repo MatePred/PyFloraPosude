@@ -1,4 +1,4 @@
-from flask import Blueprint, request, session, render_template
+from flask import Blueprint, request, jsonify, render_template
 from flask import Flask, render_template, url_for, redirect
 from service.PlantService import PlantService
 from datasource.dto.PlantDto import PlantDto
@@ -23,8 +23,18 @@ class PyPosudaInfo():
         self.name = None
         self.status = None
         self.biljkaDto: PlantDto = PlantDto()
+        self.currTemp = None
+        self.currHum = None
+        self.currLight = None
+
+    def updateSensorsValues(self, currTemp, currHum, currLight):
+        self.currTemp = currTemp
+        self.currHum = currHum
+        self.currLight = currLight
 
     def updateStatus(self, currTemp, currHum, currLight):
+        self.updateSensorsValues(currTemp, currHum, currLight)
+
         text = ""
         if self.biljkaDto is None:
             text = "nema biljke"
@@ -45,15 +55,16 @@ class PyPosudaInfo():
         self.status = text
 
 
+
 class PyPosudeEndpoint:
     showAllPosude = False
     SbmBtn_ListAllPosudaState = "+"
+
     @staticmethod
     @pyPosude.route('/', methods=['GET', 'POST'])
-    # @login_required
+    @login_required
     def listPyPosude():
         # variable to swith between full and empty PyPosuda list
-
 
         pyPosudeList: PyFloraPosuda = pyPosudeService.getAllPyPosuda2()
 
@@ -72,10 +83,12 @@ class PyPosudeEndpoint:
             pPinfo = PyPosudaInfo()
             pPinfo.name = p.name
             pPinfo.biljkaDto = plantService.getPlantById(p.plant_id)
+
             tempData = sensorsService.getSensorsPyPosudaByName(p.name).tempData
             humidityData = sensorsService.getSensorsPyPosudaByName(p.name).humidityData
             lightData = sensorsService.getSensorsPyPosudaByName(p.name).lightData
             pPinfo.updateStatus(tempData[-1], humidityData[-1], lightData[-1])
+
             if PyPosudeEndpoint.showAllPosude is False:
                 if pPinfo.biljkaDto is not None:
                     pyPosudaInfoList.append(pPinfo)
@@ -115,15 +128,17 @@ class PyPosudeEndpoint:
             keys = request.form.keys()
             k = next(iter(keys))
             if k in pyPosudeListNames:
-                p: PlantDto = pyPosudeService.getPyPosudaByName(k)
-                PyPosudeEndpoint.sharedVar = p['id']
-                return redirect(url_for('plants.plant'))
+                py = pyPosudeService.getPyPosudaByName(k)
+                PyPosudeEndpoint.selectedPyPosuda = py['id']
+                return redirect(url_for('pyPosude.pyPosuda'))
 
-        return render_template('PyPosudeTemplates/listPyPosude.html', pyPosudaInfoList=pyPosudaInfoList, SbmBtn_ListAllPosudaState=PyPosudeEndpoint.SbmBtn_ListAllPosudaState )
+        return render_template('PyPosudeTemplates/listPyPosude.html', pyPosudaInfoList=pyPosudaInfoList,
+                               SbmBtn_ListAllPosudaState=PyPosudeEndpoint.SbmBtn_ListAllPosudaState,
+                               current_user=current_user.username)
 
     @staticmethod
     @pyPosude.route('/createPyPosuda', methods=['GET', 'POST'])
-    # @login_required
+    @login_required
     def createPyPosuda():
         createPyPosudaForm: CreatePyPosudaForm = CreatePyPosudaForm()
         plant_names = plantService.getAllPlantNames()
@@ -133,6 +148,13 @@ class PyPosudeEndpoint:
         if request.method == 'POST':
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
+
+            if 'SbmBtn_PyPosude' in request.form:
+                sensorsService.SynchronizeAll()
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
 
             if 'SbmBtn_CreatePyPosuda' in request.form:
                 # create PyPosuda and update db
@@ -156,72 +178,113 @@ class PyPosudeEndpoint:
 
         return render_template('PyPosudeTemplates/createPyPosuda.html', createPyPosudaForm=createPyPosudaForm,
                                current_user=current_user.username)
-    #
-    # @staticmethod
-    # @pyPosude.route('/plant', methods=['GET', 'POST'])
-    # @login_required
-    # def plant():
-    #     #ID biljke dobijemo sa stranice "Plant list"
-    #     # sglobal variable
-    #     selectedPlant = PlantEndpoint.sharedVar
-    #
-    #     infos = PlantInfos();
-    #
-    #     plantDto = plantService.getPlantById(selectedPlant)
-    #     infos.id = selectedPlant
-    #     infos.name = plantDto['name']
-    #     infos.photoURL = plantDto['photoURL']
-    #     infos.humidityValue = plantDto['humidityValue']
-    #     infos.tempValue = plantDto['tempValue']
-    #     infos.lightValue = plantDto['lightValue']
-    #
-    #     if request.method == 'POST':
-    #         if 'SbmBtn_ModifyPlant' in request.form:
-    #             PlantEndpoint.selectedPlantToMod = infos.id
-    #             return redirect(url_for('plants.modifyPlant'))
-    #
-    #         if 'SbmBtn_UserProfile' in request.form:
-    #             return redirect(url_for('users.modifyProfile'))
-    #
-    #     return render_template('PlantTemplates/plant.html', infos=infos,current_user=current_user.username)
-    #
-    #
-    # @staticmethod
-    # @pyPosude.route('/modify', methods=['GET', 'POST'])
-    # @login_required
-    # def modifyPlant():
-    #
-    #     #sglobal variable
-    #     plant_ID = PlantEndpoint.selectedPlantToMod
-    #
-    #     #get plant from database by ID
-    #     plantData = plantService.getPlantById(int(plant_ID))
-    #
-    #     modifyPLantForm: ModifyPLantForm = ModifyPLantForm();
-    #     modifyPLantForm.name.data = plantData["name"]
-    #     modifyPLantForm.photoURL.data = plantData["photoURL"]
-    #     modifyPLantForm.humidityValue.data = plantData["humidityValue"]
-    #     modifyPLantForm.tempValue.data = plantData["tempValue"]
-    #     modifyPLantForm.lightValue.data = plantData["lightValue"]
-    #
-    #     if request.method == 'POST':
-    #         if 'SbmBtn_ModifyPlant' in request.form:
-    #             #modify plant and update db
-    #             plant_data = {
-    #                 "name": request.form['name'],
-    #                 "photoURL": request.form['photoURL'],
-    #                 "humidityValue": request.form['humidityValue'],
-    #                 "tempValue": request.form['tempValue'],
-    #                 "lightValue": request.form['lightValue']
-    #             }
-    #             plantService.updatePlant(json.dumps(plant_data), plant_ID)
-    #             return redirect(url_for('plants.listPlants'))
-    #
-    #         if 'SbmBtn_DeletePlant' in request.form:
-    #             plantService.deletePlantById(plant_ID)
-    #             return redirect(url_for('plants.listPlants'))
-    #
-    #         if 'SbmBtn_UserProfile' in request.form:
-    #             return redirect(url_for('users.modifyProfile'))
-    #
-    #     return render_template('PlantTemplates/modifyPlant.html', plantName=plantData["name"],modifyPLantForm=modifyPLantForm,current_user=current_user.username)
+
+    @staticmethod
+    @pyPosude.route('/pyPosuda', methods=['GET', 'POST'])
+    @login_required
+    def pyPosuda():
+        # ID pyPosude dobijemo sa stranice "PyPosuda list"
+        # sglobal variable
+        selectedPyPosuda = PyPosudeEndpoint.selectedPyPosuda
+
+        infos = PyPosudaInfo()
+        pyPosudaDto = pyPosudeService.getPyPosudaById(selectedPyPosuda)
+        plantDto = plantService.getPlantById(pyPosudaDto['plant_id'])
+
+        infos.name = pyPosudaDto['name']
+        # infos.status = plantDto['id']
+        infos.biljkaDto: PlantDto = plantDto
+
+        tempData = sensorsService.getSensorsPyPosudaByName(infos.name).tempData
+        humidityData = sensorsService.getSensorsPyPosudaByName(infos.name).humidityData
+        lightData = sensorsService.getSensorsPyPosudaByName(infos.name).lightData
+        infos.currTemp = tempData[-1]
+        infos.currHum = humidityData[-1]
+        infos.currLight = lightData[-1]
+
+        chart_data = create_chart_data(tempData, humidityData,lightData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
+        # Convert chart_data to a JSON string
+        chart_data_json = json.dumps(chart_data)
+
+        if request.method == 'POST':
+            if 'SbmBtn_PyPosude' in request.form:
+                sensorsService.SynchronizeAll()
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Sync' in request.form:
+                sensorsService.SynchronizeAll()
+                return redirect(url_for('pyPosude.pyPosuda'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
+
+            if 'SbmBtn_ModifyPlant' in request.form:
+                PyPosudeEndpoint.selectedPlantToMod = infos.id
+                return redirect(url_for('plants.modifyPlant'))
+
+            if 'SbmBtn_UserProfile' in request.form:
+                return redirect(url_for('users.modifyProfile'))
+
+        return render_template('PyPosudeTemplates/pyPosuda.html', infos=infos, current_user=current_user.username, chart_data=chart_data_json)
+
+
+def create_chart_data(tempData,lightData,humData, tempThresh,lightTresh,humTresh):
+
+    label = list(range(1, len(tempData)+1))
+    humDataTresh = [humTresh] * len(humData)
+    tempDataTresh = [tempThresh] * len(tempData)
+    lightDataTresh = [lightTresh] * len(lightData)
+
+    # Prepare the datasets as a dictionary
+    chart_data = {
+        'labels': label,
+        'datasets': [
+            {'label': 'Temperatura', 'data': tempData, 'borderColor': 'red', 'fill': False},
+            {'label': 'Temperatura_Threshold', 'data': tempDataTresh, 'borderColor': 'red', 'fill': False},
+            {'label': 'Svijetlost', 'data': lightData, 'borderColor': 'blue', 'fill': False},
+            {'label': 'Svijetlost', 'data': lightDataTresh, 'borderColor': 'blue', 'fill': False},
+            {'label': 'Vlažnost', 'data': humData, 'borderColor': 'green', 'fill': False},
+            {'label': 'Vlažnost_Treshold', 'data': humDataTresh, 'borderColor': 'green', 'fill': False}
+        ]
+    }
+
+    return chart_data
+# @staticmethod
+# @pyPosude.route('/modify', methods=['GET', 'POST'])
+# @login_required
+# def modifyPlant():
+#
+#     #sglobal variable
+#     plant_ID = PlantEndpoint.selectedPlantToMod
+#
+#     #get plant from database by ID
+#     plantData = plantService.getPlantById(int(plant_ID))
+#
+#     modifyPLantForm: ModifyPLantForm = ModifyPLantForm();
+#     modifyPLantForm.name.data = plantData["name"]
+#     modifyPLantForm.photoURL.data = plantData["photoURL"]
+#     modifyPLantForm.humidityValue.data = plantData["humidityValue"]
+#     modifyPLantForm.tempValue.data = plantData["tempValue"]
+#     modifyPLantForm.lightValue.data = plantData["lightValue"]
+#
+#     if request.method == 'POST':
+#         if 'SbmBtn_ModifyPlant' in request.form:
+#             #modify plant and update db
+#             plant_data = {
+#                 "name": request.form['name'],
+#                 "photoURL": request.form['photoURL'],
+#                 "humidityValue": request.form['humidityValue'],
+#                 "tempValue": request.form['tempValue'],
+#                 "lightValue": request.form['lightValue']
+#             }
+#             plantService.updatePlant(json.dumps(plant_data), plant_ID)
+#             return redirect(url_for('plants.listPlants'))
+#
+#         if 'SbmBtn_DeletePlant' in request.form:
+#             plantService.deletePlantById(plant_ID)
+#             return redirect(url_for('plants.listPlants'))
+#
+#         if 'SbmBtn_UserProfile' in request.form:
+#             return redirect(url_for('users.modifyProfile'))
+#
+#     return render_template('PlantTemplates/modifyPlant.html', plantName=plantData["name"],modifyPLantForm=modifyPLantForm,current_user=current_user.username)

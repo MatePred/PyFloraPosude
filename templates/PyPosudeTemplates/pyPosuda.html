@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pyPosudePages.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='general.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="tab-container.js"></script>
+
+</head>
+<script>
+function openTab(event, tabId) {
+  const tabPanes = document.getElementsByClassName('tab-pane');
+  const tabButtons = document.getElementsByClassName('tab-button');
+
+  for (let i = 0; i < tabButtons.length; i++) {
+    tabButtons[i].classList.remove('active');
+    tabPanes[i].classList.remove('active');
+  }
+
+  event.target.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+</script>
+
+
+<div class="top-section">
+    <!-- content goes here -->
+    <div style="float: left;">
+        <form method="post">
+            <input type="submit" name="SbmBtn_Sync" value=Sync
+                   style="width: 100px; height: 30px;">
+        </form>
+        <br><br><br><br>
+        <form method="post">
+            <input type="submit" name="SbmBtn_PyPosude" value="PyPosude" style="width: 100px; height: 30px;">
+        </form>
+        <br>
+        <form method="post">
+            <input type="submit" name="SbmBtn_Biljke" value="Biljke" style="width: 100px; height: 30px;">
+        </form>
+    </div>
+
+
+    <div style="position: absolute; right: 20px;">
+        <form method="post">
+            <input type="submit" name="SbmBtn_UserProfile" value={{current_user}}
+                   style="width: 100px; height: 30px;">
+        </form>
+    </div>
+
+    <div style="text-align: center; font-size: 12px;">
+        <h1>PyFloraPosude</h1>
+    </div>
+
+    <div style="text-align: center;">
+        <h1>PyFloraPosuda</h1>
+    </div>
+
+    <div style="position: absolute; right: 20px;">
+        <a href="{{url_for('users.logout')}}">Logout</a>
+    </div>
+    <br><br><br>
+
+</div>
+    <div class="container">
+        <div class="top-left">
+          <!-- Content for the top left section -->
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="Nazivposude">Naziv Posude:</label> {{ infos.name }}
+                </div>
+                <br><br>
+                <div class="form-group">
+                    <label for="T_senzor">Senzor temperature:</label> {{ infos.currTemp }}
+                </div>
+                <br><br>
+                        <div class="form-group">
+                    <label for="L_senzor">Senzor svijetla:</label> {{ infos.currHum }}
+                </div>
+                <br><br>
+                <div class="form-group">
+                    <label for="H_senzor">Senzor vlage:</label> {{ infos.currLight }}
+                </div>
+                <br>
+                <div class="form-group-submit-buttons">
+                <input type="submit" name="SbmBtn_ModifyPyPosuda" value="Ažuriraj">
+            </div>
+            </form>
+        </div>
+
+        <div class="top-right">
+          <!-- Content for the top right section -->
+            <img src="{{ url_for('static', filename=infos.biljkaDto.photoURL) }}" alt={{ infos.biljkaDto.photoURL }}>
+        </div>
+        <br><br>
+        <div class="bottom">
+          <!-- Content for the bottom section -->
+            <div class="tab-container">
+                <div class="tab-header">
+                  <button class="tab-button active" onclick="openTab(event, 'tab1')">Line chart</button>
+                  <button class="tab-button" onclick="openTab(event, 'tab2')">Pie chart</button>
+                  <button class="tab-button" onclick="openTab(event, 'tab3')">Histogram</button>
+                </div>
+                <div class="tab-content">
+                  <div id="tab1" class="tab-pane active">
+                    <h3>Tab 1 Content</h3>
+                    <p>This is the content of Tab 1.</p>
+
+                    <div>
+                        <canvas id="TestChart"></canvas>
+                    </div>
+
+
+                  </div>
+
+                  <div id="tab2" class="tab-pane">
+                    <div>
+                        <canvas id="LineChart"></canvas>
+                    </div>
+                  </div>
+
+                  <div id="tab3" class="tab-pane">
+
+                  </div>
+            </div>
+                </div>
+    </div>
+ </div>
+
+
+    <script>
+        // Retrieve the chart_data variable from Flask and parse it as JSON
+        const chartData = JSON.parse('{{ chart_data | safe }}');
+
+        // Access the datasets from chartData
+        const labels = chartData.labels;
+        const datasets = chartData.datasets;
+
+        // Create a new chart using the datasets
+        const ctx3 = document.getElementById('TestChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

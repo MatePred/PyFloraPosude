@@ -15,12 +15,25 @@
 
 <div class="top-section">
     <!-- content goes here -->
+    <div style="float: left;">
+        <br><br><br><br><br><br>
+        <form method="post">
+            <input type="submit" name="SbmBtn_PyPosude" value="PyPosude" style="width: 100px; height: 30px;">
+        </form>
+        <br>
+        <form method="post">
+            <input type="submit" name="SbmBtn_Biljke" value="Biljke" style="width: 100px; height: 30px;">
+        </form>
+    </div>
+
+
     <div style="position: absolute; right: 20px;">
         <form method="post">
             <input type="submit" name="SbmBtn_UserProfile" value={{current_user}}
                    style="width: 100px; height: 30px;">
         </form>
     </div>
+
     <div style="text-align: center; font-size: 12px;">
         <h1>PyFloraPosude</h1>
     </div>
@@ -28,13 +41,16 @@
     <div style="text-align: center;">
         <h1>Biljka</h1>
     </div>
-    <div style="position: absolute; right: 0;">
-        <a href="{{url_for('users.logout')}}">Press here to logout</a>
+
+    <div style="position: absolute; right: 20px;">
+        <a href="{{url_for('users.logout')}}">Logout</a>
     </div>
+    <br><br><br>
 
 </div>
 
 <div style="position: absolute; right: 40px; top:200px">
+    <br><br><br>
     <form method="post">
         <input type="submit" name="SbmBtn_ModifyPlant" value=Ažuriraj
                style="width: 100px; height: 30px;">
@@ -43,7 +59,7 @@
 
 
 <div class="plant-box" style="...">
-    <img src="{{ url_for('static', filename=infos.photoURL) }}" alt="My Image">
+    <img src="{{ url_for('static', filename=infos.photoURL) }}" alt="No image">
 </div>
 
 <div class="plant-infos">
