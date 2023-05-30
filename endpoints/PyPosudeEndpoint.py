@@ -1,3 +1,4 @@
+import numpy
 from flask import Blueprint, request, jsonify, render_template
 from flask import Flask, render_template, url_for, redirect
 from service.PlantService import PlantService
@@ -7,6 +8,8 @@ from datasource.entity.PyFloraPosuda import PyFloraPosuda
 import json
 from forms.CreatePyPosudaForm import CreatePyPosudaForm
 from service.SensorsService import SensorsPyPosuda, SensorsService
+import numpy as np
+import random
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 pyPosude = Blueprint('pyPosude', __name__)
@@ -203,8 +206,11 @@ class PyPosudeEndpoint:
         infos.currLight = lightData[-1]
 
         chart_data = create_chart_data(tempData, humidityData,lightData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
-        # Convert chart_data to a JSON string
         chart_data_json = json.dumps(chart_data)
+
+        maxVal = numpy.ceil(max(max(tempData),max(humidityData),max(lightData)))
+        histogramChartData = createHistogramData(0,maxVal,2,tempData, humidityData,lightData)
+        histogramChartData_json = json.dumps(histogramChartData)
 
         if request.method == 'POST':
             if 'SbmBtn_PyPosude' in request.form:
@@ -225,7 +231,7 @@ class PyPosudeEndpoint:
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
 
-        return render_template('PyPosudeTemplates/pyPosuda.html', infos=infos, current_user=current_user.username, chart_data=chart_data_json)
+        return render_template('PyPosudeTemplates/pyPosuda.html', infos=infos, current_user=current_user.username, chart_data=chart_data_json,histogramChartData_json=histogramChartData_json)
 
 
 def create_chart_data(tempData,lightData,humData, tempThresh,lightTresh,humTresh):
@@ -249,6 +255,66 @@ def create_chart_data(tempData,lightData,humData, tempThresh,lightTresh,humTresh
     }
 
     return chart_data
+
+
+def createHistogramData2(start_value,end_value,step_size,data):
+    # Generate a list of random values within a specific range
+    #start_value = 0
+    #end_value = 100
+    #step_size = 10
+    #num_values = 100
+
+    #data = [random.randint(start_value, end_value) for _ in range(num_values)]
+
+    # Calculate the bin edges for the histogram
+    bins = np.arange(start_value, end_value + step_size, step_size)
+
+    # Create the histogram
+    hist, bin_edges = np.histogram(data, bins=bins)
+
+    # Prepare the data for the histogram chart
+    labels = [f'{bin_edges[i]}-{bin_edges[i + 1]}' for i in range(len(bin_edges) - 1)]
+    frequencies = hist.tolist()
+
+    # Create a dictionary containing the histogram data
+    histogram_data = {
+        'labels': labels,
+        'data': frequencies
+    }
+
+    return histogram_data
+
+
+def createHistogramData(start_value, end_value, step_size, tempData, humData, lightData):
+    datasets = [tempData, humData, lightData]
+
+    dataset1 = [random.randint(start_value, end_value) for _ in range(100)]
+    dataset2 = [random.randint(start_value, end_value) for _ in range(100)]
+    dataset3 = [random.randint(start_value, end_value) for _ in range(100)]
+    #datasets = [dataset1, dataset2, dataset3]
+
+    # Calculate the bin edges for the histogram
+    bins = np.arange(start_value, end_value + step_size, step_size)
+
+    # Create the histograms for each dataset
+    histograms = []
+    for dataset in datasets:
+        hist, _ = np.histogram(dataset, bins=bins)
+        histograms.append(hist.tolist())
+
+    # Prepare the data for the histogram chart
+    labels = [f'{bins[i]}-{bins[i + 1]}' for i in range(len(bins) - 1)]
+
+    histogram_data = {
+        'labels': labels,
+        'datasets': [
+            {'label': 'Dataset 1', 'data': histograms[0],'backgroundColor': 'red'},
+            {'label': 'Dataset 2', 'data': histograms[1],'backgroundColor': 'green'},
+            {'label': 'Dataset 3', 'data': histograms[2],'backgroundColor': 'blue'}
+        ]
+    }
+
+    return histogram_data
 # @staticmethod
 # @pyPosude.route('/modify', methods=['GET', 'POST'])
 # @login_required

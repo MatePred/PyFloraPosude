@@ -111,29 +111,25 @@ function openTab(event, tabId) {
                 </div>
                 <div class="tab-content">
                   <div id="tab1" class="tab-pane active">
-                    <h3>Tab 1 Content</h3>
-                    <p>This is the content of Tab 1.</p>
-
                     <div>
                         <canvas id="TestChart"></canvas>
                     </div>
-
-
                   </div>
 
                   <div id="tab2" class="tab-pane">
-                    <div>
-                        <canvas id="LineChart"></canvas>
-                    </div>
+
                   </div>
 
                   <div id="tab3" class="tab-pane">
-
+                      <div>
+                          <canvas id="histogramChart2"></canvas>
+                      </div>
                   </div>
             </div>
                 </div>
     </div>
  </div>
+
 
 
     <script>
@@ -160,7 +156,66 @@ function openTab(event, tabId) {
                 }
             }
         });
+
     </script>
+
+<script>
+  // Retrieve the histogram data from Flask and parse it as JSON
+  const histogramData = JSON.parse('{{ histogramChartData_json | safe }}');
+
+  // Access the labels and data from histogramData
+  const labels3 = histogramData.labels;
+  const data3 = histogramData.data;
+
+  // Create a new chart
+  const ctx4 = document.getElementById('histogramChart').getContext('2d');
+  new Chart(ctx4, {
+    type: 'bar',
+    data: {
+      labels: labels3,
+      datasets: [{
+        data: data3,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        x: {
+          beginAtZero: true
+        },
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+  <script>
+  // Retrieve the histogram data from Flask and parse it as JSON
+  const histogramData2 = JSON.parse('{{ histogramChartData_json | safe }}');
+
+  // Create the histogram chart
+    const ctx5 = document.getElementById("histogramChart2").getContext("2d");
+    new Chart(ctx5, {
+      type: "bar",
+      data: histogramData2,
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            beginAtZero: true
+          },
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+
 </body>
 
 </html>
