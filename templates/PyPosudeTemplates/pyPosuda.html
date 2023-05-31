@@ -117,7 +117,17 @@ function openTab(event, tabId) {
                   </div>
 
                   <div id="tab2" class="tab-pane">
-
+                        <div class="chart-row">
+                            <div class="chart-container">
+                              <canvas id="PieChart1"></canvas>
+                            </div>
+                            <div class="chart-container">
+                              <canvas id="PieChart2"></canvas>
+                            </div>
+                            <div class="chart-container">
+                              <canvas id="PieChart3"></canvas>
+                            </div>
+                        </div>
                   </div>
 
                   <div id="tab3" class="tab-pane">
@@ -156,42 +166,7 @@ function openTab(event, tabId) {
                 }
             }
         });
-
     </script>
-
-<script>
-  // Retrieve the histogram data from Flask and parse it as JSON
-  const histogramData = JSON.parse('{{ histogramChartData_json | safe }}');
-
-  // Access the labels and data from histogramData
-  const labels3 = histogramData.labels;
-  const data3 = histogramData.data;
-
-  // Create a new chart
-  const ctx4 = document.getElementById('histogramChart').getContext('2d');
-  new Chart(ctx4, {
-    type: 'bar',
-    data: {
-      labels: labels3,
-      datasets: [{
-        data: data3,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        x: {
-          beginAtZero: true
-        },
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-</script>
 
   <script>
   // Retrieve the histogram data from Flask and parse it as JSON
@@ -215,6 +190,81 @@ function openTab(event, tabId) {
       }
     });
   </script>
+
+  <script>
+// Pie Chart 1
+const tempPieChartData = JSON.parse('{{ tempPieChart_json | safe }}');
+
+// Access the labels and data from tempPieChartData
+const labels_PieCchartTemp = tempPieChartData.labels;
+const data_PieChartTemp = tempPieChartData.datasets[0].data;
+
+var ctx1 = document.getElementById('PieChart1').getContext('2d');
+var chart1 = new Chart(ctx1, {
+  type: 'pie',
+  data: {
+    datasets: [{
+      data: data_PieChartTemp,
+      backgroundColor: tempPieChartData.datasets[0].backgroundColor,
+      label: tempPieChartData.datasets[0].label
+    }],
+    labels: labels_PieCchartTemp,
+  },
+  options: {
+    // Add any additional options or styling here
+  },
+});
+</script>
+
+<script>
+// Pie Chart 2
+const lightPieChartData = JSON.parse('{{ lightPieChart_json | safe }}');
+
+// Access the labels and data from tempPieChartData
+const labels_PieChartLight = lightPieChartData.labels;
+const data_PieChartLight = lightPieChartData.datasets[0].data;
+
+var ctx10 = document.getElementById('PieChart2').getContext('2d');
+var chart10 = new Chart(ctx10, {
+  type: 'pie',
+  data: {
+    datasets: [{
+      data: data_PieChartLight,
+      backgroundColor: lightPieChartData.datasets[0].backgroundColor,
+      label: lightPieChartData.datasets[0].label
+    }],
+    labels: labels_PieChartLight,
+  },
+  options: {
+    // Add any additional options or styling here
+  },
+});
+</script>
+
+<script>
+// Pie Chart 2
+const humPieChartData = JSON.parse('{{ humPieChart_json | safe }}');
+
+// Access the labels and data from tempPieChartData
+const labels_PieChartHum = humPieChartData.labels;
+const data_PieChartHum = humPieChartData.datasets[0].data;
+
+var ctx100 = document.getElementById('PieChart3').getContext('2d');
+var chart100 = new Chart(ctx100, {
+  type: 'pie',
+  data: {
+    datasets: [{
+      data: data_PieChartHum,
+      backgroundColor: humPieChartData.datasets[0].backgroundColor,
+      label: humPieChartData.datasets[0].label
+    }],
+    labels: labels_PieChartHum,
+  },
+  options: {
+    // Add any additional options or styling here
+  },
+});
+</script>
 
 </body>
 

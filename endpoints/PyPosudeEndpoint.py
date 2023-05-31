@@ -87,9 +87,9 @@ class PyPosudeEndpoint:
             pPinfo.name = p.name
             pPinfo.biljkaDto = plantService.getPlantById(p.plant_id)
 
-            tempData = sensorsService.getSensorsPyPosudaByName(p.name).tempData
-            humidityData = sensorsService.getSensorsPyPosudaByName(p.name).humidityData
-            lightData = sensorsService.getSensorsPyPosudaByName(p.name).lightData
+            tempData = sensorsService.getSensorsPyPosudaByName(p.name).tempData[:]
+            humidityData = sensorsService.getSensorsPyPosudaByName(p.name).humidityData[:]
+            lightData = sensorsService.getSensorsPyPosudaByName(p.name).lightData[:]
             pPinfo.updateStatus(tempData[-1], humidityData[-1], lightData[-1])
 
             if PyPosudeEndpoint.showAllPosude is False:
@@ -198,19 +198,35 @@ class PyPosudeEndpoint:
         # infos.status = plantDto['id']
         infos.biljkaDto: PlantDto = plantDto
 
-        tempData = sensorsService.getSensorsPyPosudaByName(infos.name).tempData
-        humidityData = sensorsService.getSensorsPyPosudaByName(infos.name).humidityData
-        lightData = sensorsService.getSensorsPyPosudaByName(infos.name).lightData
+        tempData = sensorsService.getSensorsPyPosudaByName(infos.name).tempData[:]
+        humidityData = sensorsService.getSensorsPyPosudaByName(infos.name).humidityData[:]
+        lightData = sensorsService.getSensorsPyPosudaByName(infos.name).lightData[:]
+
         infos.currTemp = tempData[-1]
         infos.currHum = humidityData[-1]
         infos.currLight = lightData[-1]
 
-        chart_data = create_chart_data(tempData, humidityData,lightData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
+
+
+        lightPieChart = create_pie_chart_data(lightData, infos.biljkaDto['lightValue'], 'Svijetlo')
+        lightPieChart_json = json.dumps(lightPieChart)
+
+        tempPieChart = create_pie_chart_data(tempData, infos.biljkaDto['tempValue'], 'Temperatura')
+        tempPieChart_json = json.dumps(tempPieChart)
+
+        humPieChart = create_pie_chart_data(humidityData, infos.biljkaDto['humidityValue'], 'Vlažnost')
+        humPieChart_json = json.dumps(humPieChart)
+
+        chart_data = create_chart_data(tempData, lightData, humidityData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
         chart_data_json = json.dumps(chart_data)
 
         maxVal = numpy.ceil(max(max(tempData),max(humidityData),max(lightData)))
-        histogramChartData = createHistogramData(0,maxVal,2,tempData, humidityData,lightData)
+        histogramChartData = createHistogramData(0,maxVal,2,tempData, lightData, humidityData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
         histogramChartData_json = json.dumps(histogramChartData)
+
+
+
+
 
         if request.method == 'POST':
             if 'SbmBtn_PyPosude' in request.form:
@@ -231,7 +247,9 @@ class PyPosudeEndpoint:
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
 
-        return render_template('PyPosudeTemplates/pyPosuda.html', infos=infos, current_user=current_user.username, chart_data=chart_data_json,histogramChartData_json=histogramChartData_json)
+        return render_template('PyPosudeTemplates/pyPosuda.html', infos=infos, current_user=current_user.username, chart_data=chart_data_json,
+                               histogramChartData_json=histogramChartData_json, tempPieChart_json=tempPieChart_json,lightPieChart_json=lightPieChart_json,
+                               humPieChart_json=humPieChart_json)
 
 
 def create_chart_data(tempData,lightData,humData, tempThresh,lightTresh,humTresh):
@@ -245,53 +263,23 @@ def create_chart_data(tempData,lightData,humData, tempThresh,lightTresh,humTresh
     chart_data = {
         'labels': label,
         'datasets': [
-            {'label': 'Temperatura', 'data': tempData, 'borderColor': 'red', 'fill': False},
-            {'label': 'Temperatura_Threshold', 'data': tempDataTresh, 'borderColor': 'red', 'fill': False},
-            {'label': 'Svijetlost', 'data': lightData, 'borderColor': 'blue', 'fill': False},
-            {'label': 'Svijetlost', 'data': lightDataTresh, 'borderColor': 'blue', 'fill': False},
-            {'label': 'Vlažnost', 'data': humData, 'borderColor': 'green', 'fill': False},
-            {'label': 'Vlažnost_Treshold', 'data': humDataTresh, 'borderColor': 'green', 'fill': False}
+            {'label': 'Temperatura', 'data': tempData, 'borderColor': 'red', 'fill': False,'tension': 0.3},
+            {'label': 'T_Threshold', 'data': tempDataTresh, 'borderColor': 'red', 'fill': False},
+            {'label': 'Svijetlost', 'data': lightData, 'borderColor': 'blue', 'fill': False,'tension': 0.3},
+            {'label': 'S_Threshold', 'data': lightDataTresh, 'borderColor': 'blue', 'fill': False},
+            {'label': 'Vlažnost', 'data': humData, 'borderColor': 'green', 'fill': False,'tension': 0.3},
+            {'label': 'V_Threshold', 'data': humDataTresh, 'borderColor': 'green', 'fill': False}
         ]
     }
-
     return chart_data
 
+def createHistogramData(start_value, end_value, step_size, tempData,lightData, humData ,tempThresh,lightTresh,humTresh):
 
-def createHistogramData2(start_value,end_value,step_size,data):
-    # Generate a list of random values within a specific range
-    #start_value = 0
-    #end_value = 100
-    #step_size = 10
-    #num_values = 100
-
-    #data = [random.randint(start_value, end_value) for _ in range(num_values)]
-
-    # Calculate the bin edges for the histogram
-    bins = np.arange(start_value, end_value + step_size, step_size)
-
-    # Create the histogram
-    hist, bin_edges = np.histogram(data, bins=bins)
-
-    # Prepare the data for the histogram chart
-    labels = [f'{bin_edges[i]}-{bin_edges[i + 1]}' for i in range(len(bin_edges) - 1)]
-    frequencies = hist.tolist()
-
-    # Create a dictionary containing the histogram data
-    histogram_data = {
-        'labels': labels,
-        'data': frequencies
-    }
-
-    return histogram_data
-
-
-def createHistogramData(start_value, end_value, step_size, tempData, humData, lightData):
-    datasets = [tempData, humData, lightData]
-
-    dataset1 = [random.randint(start_value, end_value) for _ in range(100)]
-    dataset2 = [random.randint(start_value, end_value) for _ in range(100)]
-    dataset3 = [random.randint(start_value, end_value) for _ in range(100)]
-    #datasets = [dataset1, dataset2, dataset3]
+    maxData = max(len(humData),len(tempData),len(lightData))
+    humDataTresh = [humTresh] * maxData
+    tempDataTresh = [tempThresh] * maxData
+    lightDataTresh = [lightTresh] * maxData
+    datasets = [tempData,tempDataTresh, humData,humDataTresh, lightData,lightDataTresh]
 
     # Calculate the bin edges for the histogram
     bins = np.arange(start_value, end_value + step_size, step_size)
@@ -308,13 +296,45 @@ def createHistogramData(start_value, end_value, step_size, tempData, humData, li
     histogram_data = {
         'labels': labels,
         'datasets': [
-            {'label': 'Dataset 1', 'data': histograms[0],'backgroundColor': 'red'},
-            {'label': 'Dataset 2', 'data': histograms[1],'backgroundColor': 'green'},
-            {'label': 'Dataset 3', 'data': histograms[2],'backgroundColor': 'blue'}
+            {'label': 'Temperatura', 'data': histograms[0],'backgroundColor': 'red'},
+            {'label': 'T_Threshold', 'data': histograms[1],'backgroundColor': 'red'},
+            {'label': 'Svijetlost', 'data': histograms[4], 'backgroundColor': 'blue'},
+            {'label': 'S_Threshold', 'data': histograms[5], 'backgroundColor': 'blue'},
+            {'label': 'Vlažnost', 'data': histograms[2], 'backgroundColor': 'green'},
+            {'label': 'V_Threshold', 'data': histograms[3], 'backgroundColor': 'green'}
         ]
     }
 
     return histogram_data
+
+
+#create Bar chart to represent average value, compared to the threshold.
+def create_pie_chart_data(data,dataThresh, label):
+
+    labels = ['Samples bellow threshold', 'Samples above threshold']
+    countBlwThresh = 0
+    countAbvThresh = 0
+    for i in data:
+        if i < dataThresh:
+            countBlwThresh +=1
+        else:
+            countAbvThresh +=1
+
+    sendData = [countBlwThresh, countAbvThresh]
+
+    # Prepare the datasets as a dictionary
+    chart_data = {
+        'labels': labels,
+        'datasets': [
+            {
+                'data': sendData,
+                'backgroundColor': ['red', 'green'],
+                'label': label
+            }
+        ]
+    }
+    return chart_data
+
 # @staticmethod
 # @pyPosude.route('/modify', methods=['GET', 'POST'])
 # @login_required

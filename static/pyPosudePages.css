@@ -116,3 +116,10 @@ img {
 .tab-pane.active {
   display: block;
 }
+
+.chart-row {
+  display: flex;
+  }
+.chart-container {
+  flex: 1;
+}
