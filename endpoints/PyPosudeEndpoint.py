@@ -9,7 +9,6 @@ import json
 from forms.CreatePyPosudaForm import CreatePyPosudaForm
 from service.SensorsService import SensorsPyPosuda, SensorsService
 import numpy as np
-import random
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 pyPosude = Blueprint('pyPosude', __name__)
@@ -19,7 +18,6 @@ pyPosude = Blueprint('pyPosude', __name__)
 plantService = PlantService()
 pyPosudeService = PyFloraPosudeService()
 sensorsService = SensorsService()
-
 
 class PyPosudaInfo():
     def __init__(self):
@@ -56,8 +54,6 @@ class PyPosudaInfo():
                 text = text + "Vlaga ok"
 
         self.status = text
-
-
 
 class PyPosudeEndpoint:
     showAllPosude = False
@@ -183,6 +179,54 @@ class PyPosudeEndpoint:
                                current_user=current_user.username)
 
     @staticmethod
+    @pyPosude.route('/modifyPyPosuda', methods=['GET', 'POST'])
+    @login_required
+    def modifyPyPosuda():
+        selectedPyPosuda = PyPosudeEndpoint.selectedPyPosuda
+        pyPosudaDto = pyPosudeService.getPyPosudaById(selectedPyPosuda)
+        plantDto = plantService.getPlantById(pyPosudaDto['plant_id'])
+
+        createPyPosudaForm: CreatePyPosudaForm = CreatePyPosudaForm()
+        plant_names = plantService.getAllPlantNames()
+        #plant_names.insert(0, plantDto['name'])
+        createPyPosudaForm.name.data = pyPosudaDto['name']
+        createPyPosudaForm.plant_name.choices = [(plant_name, plant_name) for plant_name in plant_names]
+
+        if request.method == 'POST':
+            if 'SbmBtn_UserProfile' in request.form:
+                return redirect(url_for('users.modifyProfile'))
+
+            if 'SbmBtn_PyPosude' in request.form:
+                sensorsService.SynchronizeAll()
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+            if 'SbmBtn_Biljke' in request.form:
+                return redirect(url_for('plants.listPlants'))
+
+            if 'SbmBtn_ModifyPyPosuda' in request.form:
+                # create PyPosuda and update db
+                selected_plant_name = createPyPosudaForm.plant_name.data
+                data = plantService.getPlantByName(selected_plant_name)
+                # dumps the json object into an element
+                json_str = json.dumps(data)
+                # load the json to a string
+                resp = json.loads(json_str)
+                selected_plant_id = resp['id']
+
+                pyPosudaData = {
+                    "name": request.form['name'],
+                    "plant_id": selected_plant_id
+                }
+
+                # write to DB
+                pyPosudeService.updatePyPosuda(pyPosudaData, selectedPyPosuda)
+
+                return redirect(url_for('pyPosude.listPyPosude'))
+
+        return render_template('PyPosudeTemplates/modifyPyPosuda.html', createPyPosudaForm=createPyPosudaForm,
+                               current_user=current_user.username)
+
+    @staticmethod
     @pyPosude.route('/pyPosuda', methods=['GET', 'POST'])
     @login_required
     def pyPosuda():
@@ -194,39 +238,43 @@ class PyPosudeEndpoint:
         pyPosudaDto = pyPosudeService.getPyPosudaById(selectedPyPosuda)
         plantDto = plantService.getPlantById(pyPosudaDto['plant_id'])
 
+
         infos.name = pyPosudaDto['name']
+        chart_data_json = []
+        lightPieChart_json = []
+        tempPieChart_json = []
+        humPieChart_json = []
+        histogramChartData_json = []
+
         # infos.status = plantDto['id']
+
         infos.biljkaDto: PlantDto = plantDto
 
-        tempData = sensorsService.getSensorsPyPosudaByName(infos.name).tempData[:]
-        humidityData = sensorsService.getSensorsPyPosudaByName(infos.name).humidityData[:]
-        lightData = sensorsService.getSensorsPyPosudaByName(infos.name).lightData[:]
+        if plantDto is not None:
 
-        infos.currTemp = tempData[-1]
-        infos.currHum = humidityData[-1]
-        infos.currLight = lightData[-1]
+            tempData = sensorsService.getSensorsPyPosudaByName(infos.name).tempData[:]
+            humidityData = sensorsService.getSensorsPyPosudaByName(infos.name).humidityData[:]
+            lightData = sensorsService.getSensorsPyPosudaByName(infos.name).lightData[:]
 
+            infos.currTemp = tempData[-1]
+            infos.currHum = humidityData[-1]
+            infos.currLight = lightData[-1]
 
+            lightPieChart = create_pie_chart_data(lightData, infos.biljkaDto['lightValue'], 'Svijetlo')
+            lightPieChart_json = json.dumps(lightPieChart)
 
-        lightPieChart = create_pie_chart_data(lightData, infos.biljkaDto['lightValue'], 'Svijetlo')
-        lightPieChart_json = json.dumps(lightPieChart)
+            tempPieChart = create_pie_chart_data(tempData, infos.biljkaDto['tempValue'], 'Temperatura')
+            tempPieChart_json = json.dumps(tempPieChart)
 
-        tempPieChart = create_pie_chart_data(tempData, infos.biljkaDto['tempValue'], 'Temperatura')
-        tempPieChart_json = json.dumps(tempPieChart)
+            humPieChart = create_pie_chart_data(humidityData, infos.biljkaDto['humidityValue'], 'Vlažnost')
+            humPieChart_json = json.dumps(humPieChart)
 
-        humPieChart = create_pie_chart_data(humidityData, infos.biljkaDto['humidityValue'], 'Vlažnost')
-        humPieChart_json = json.dumps(humPieChart)
+            chart_data = create_chart_data(tempData, lightData, humidityData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
+            chart_data_json = json.dumps(chart_data)
 
-        chart_data = create_chart_data(tempData, lightData, humidityData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
-        chart_data_json = json.dumps(chart_data)
-
-        maxVal = numpy.ceil(max(max(tempData),max(humidityData),max(lightData)))
-        histogramChartData = createHistogramData(0,maxVal,2,tempData, lightData, humidityData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
-        histogramChartData_json = json.dumps(histogramChartData)
-
-
-
-
+            maxVal = numpy.ceil(max(max(tempData),max(humidityData),max(lightData)))
+            histogramChartData = createHistogramData(0,maxVal,2,tempData, lightData, humidityData,infos.biljkaDto['tempValue'],infos.biljkaDto['lightValue'],infos.biljkaDto['humidityValue'])
+            histogramChartData_json = json.dumps(histogramChartData)
 
         if request.method == 'POST':
             if 'SbmBtn_PyPosude' in request.form:
@@ -240,9 +288,9 @@ class PyPosudeEndpoint:
             if 'SbmBtn_Biljke' in request.form:
                 return redirect(url_for('plants.listPlants'))
 
-            if 'SbmBtn_ModifyPlant' in request.form:
-                PyPosudeEndpoint.selectedPlantToMod = infos.id
-                return redirect(url_for('plants.modifyPlant'))
+            if 'SbmBtn_ModifyPyPosuda' in request.form:
+                PyPosudeEndpoint.selectedPyPosuda = selectedPyPosuda
+                return redirect(url_for('pyPosude.modifyPyPosuda'))
 
             if 'SbmBtn_UserProfile' in request.form:
                 return redirect(url_for('users.modifyProfile'))
@@ -306,7 +354,6 @@ def createHistogramData(start_value, end_value, step_size, tempData,lightData, h
     }
 
     return histogram_data
-
 
 #create Bar chart to represent average value, compared to the threshold.
 def create_pie_chart_data(data,dataThresh, label):

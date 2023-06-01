@@ -58,45 +58,33 @@ class PyFloraPosudeService:
 
         return None
 
-    def deletePlantById(self, id):
-        return DBUtils.deleteById(Plant, id)
+    def deletePyPosudaById(self, id):
+        return DBUtils.deleteById(PyFloraPosuda, id)
 
-    def deletePlantByName(self, name):
-        return DBUtils.deleteByName(Plant, name)
+    def deletePyPosudaByName(self, name):
+        return DBUtils.deleteByName(PyFloraPosuda, name)
 
-    def updatePlant(self, userData, id):
-        plantDto: PlantDto = PlantDto().serialize(userData, ignoreProperties=False)
-        plant: Plant = DBUtils.findById(Plant, id)
+    def updatePyPosuda(self, userData, id):
+        pyPosudaDto: PyFloraPosudaDto = PyFloraPosudaDto().serialize(userData, ignoreProperties=False)
+        pyFloraPosuda: PyFloraPosuda = DBUtils.findById(PyFloraPosuda, id)
 
         updated = False
-        if plant is not None:
+        if pyFloraPosuda is not None:
 
-            if plantDto.name is not None and plant.name != plantDto.name:
-                plant.name = plantDto.name
+            if pyPosudaDto.name is not None and pyFloraPosuda.name != pyPosudaDto.name:
+                pyFloraPosuda.name = pyPosudaDto.name
                 updated = True
 
-            if plantDto.photoURL is not None and plant.photoURL != plantDto.photoURL:
-                plant.photoURL = plantDto.photoURL
-                updated = True
-
-            if plantDto.humidityValue is not None and plant.humidityValue != plantDto.humidityValue:
-                plant.humidityValue = plantDto.humidityValue
-                updated = True
-
-            if plantDto.tempValue is not None and plant.tempValue != plantDto.tempValue:
-                plant.tempValue = plantDto.tempValue
-                updated = True
-
-            if plantDto.lightValue is not None and plant.lightValue != plantDto.lightValue:
-                plant.lightValue = plantDto.lightValue
+            if pyPosudaDto.plant_id is not None and pyFloraPosuda.plant_id != pyPosudaDto.plant_id:
+                pyFloraPosuda.plant_id = pyPosudaDto.plant_id
                 updated = True
 
             if updated:
                 DBUtils.commit()
-                newPlantDto = PlantDto.createFromEntity(plant)
-                return updated, newPlantDto.getJson()
+                newPyPosudaDto = pyPosudaDto.createFromEntity(pyFloraPosuda)
+                return updated, newPyPosudaDto.getJson()
 
-            return updated, PlantDto.createFromEntity(plant).getJson()
+            return updated, PlantDto.createFromEntity(pyFloraPosuda).getJson()
 
         return False, None
 

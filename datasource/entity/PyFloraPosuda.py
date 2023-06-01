@@ -9,9 +9,6 @@ class PyFloraPosuda(db.Model):
     name = db.Column(db.String(30), unique=True, nullable=False)
     plant_id = db.Column(db.Integer, db.ForeignKey('plant.id'))
 
-
-
-
     @staticmethod
     def createPyPosudaFromDto(dto: PlantDto):
         pyFloraPosuda: PyFloraPosuda = PyFloraPosuda()

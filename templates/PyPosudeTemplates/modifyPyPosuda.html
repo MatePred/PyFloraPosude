@@ -5,18 +5,16 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlantsList</title>
+    <title>Plant</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='adminPanel.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='plantPages.css') }}">
 </head>
 
-<body>
-
 <div class="top-section">
     <!-- content goes here -->
     <div style="float: left;">
-        <br><br><br><br><br><br>
+        <br><br><br><br><br>
         <form method="post">
             <input type="submit" name="SbmBtn_PyPosude" value="PyPosude" style="width: 100px; height: 30px;">
         </form>
@@ -39,7 +37,7 @@
     </div>
 
     <div style="text-align: center;">
-        <h1>Lista Biljaka</h1>
+        <h1>Ažuriraj PyFloraPosuda</h1>
     </div>
 
     <div style="position: absolute; right: 20px;">
@@ -49,42 +47,25 @@
 
 </div>
 
-<div class="plant-grid">
-
-    <div class="plant-box2">
-        <div class="child-box">
-            <h1 style="text-align: center;">Dodaj novu biljku</h1>
-            <br><br><br>
-            <div class="PlusBtn">
-                <form method="post" style="width: 100%; height: 100%;">
-                    <input style="width: 100%; height: 100%;font-size: 60px;" type="submit" name="SbmBtn_AddPlant"
-                           value="+">
-                </form>
-            </div>
+<div class="modifyPlant">
+    <br><br>
+    <form method="POST" action="">
+        <div class="form-group">
+            <label for="plant-name">Name:</label> {{ createPyPosudaForm.name }}
         </div>
-    </div>
-
-    {% for p in plantsList %}
-    <div class="plant-box2">
-        <div class="child-box">
-            <h1>Podaci o biljci</h1>
-            <h1>{{ p.name }}</h1>
-            <div class="PlusBtn">
-                <form method="post" style="width: 100%; height: 100%;">
-                    <input style="width: 100%; height: 100%;font-size: 60px;" type="submit" name={{ p.name }}
-                           value="+">
-                </form>
-            </div>
+        <br><br>
+        <div class="form-group">
+            <label for="{{ createPyPosudaForm.plant_name.id }}">Plant</label>
+            {{ createPyPosudaForm.plant_name(class="form-control") }}
         </div>
-        <div class="child-box">
-            <img src="{{ url_for('static', filename=p.photoURL) }}" alt={{ p.photoURL }}>
+        <br><br>
+        <div class="form-group-submit-buttons">
+            <input type="submit" name="SbmBtn_ModifyPyPosuda" value="Ažuriraj">
         </div>
-    </div>
-    {% endfor %}
-
+    </form>
 </div>
 
-</body>
 
+</body>
 
 </html>
