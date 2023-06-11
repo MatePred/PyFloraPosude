@@ -10,6 +10,7 @@ from forms.CreatePyPosudaForm import CreatePyPosudaForm
 from service.SensorsService import SensorsPyPosuda, SensorsService
 import numpy as np
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+import logging
 
 pyPosude = Blueprint('pyPosude', __name__)
 
@@ -158,12 +159,17 @@ class PyPosudeEndpoint:
             if 'SbmBtn_CreatePyPosuda' in request.form:
                 # create PyPosuda and update db
                 selected_plant_name = createPyPosudaForm.plant_name.data
-                data = plantService.getPlantByName(selected_plant_name)
-                # dumps the json object into an element
-                json_str = json.dumps(data)
-                # load the json to a string
-                resp = json.loads(json_str)
-                selected_plant_id = resp['id']
+                #print(selected_plant_name)
+                #logging.debug("Selected_plant_name is {selected_plant_name}")
+                if selected_plant_name != "None":
+                    data = plantService.getPlantByName(selected_plant_name)
+                    # dumps the json object into an element
+                    json_str = json.dumps(data)
+                    # load the json to a string
+                    resp = json.loads(json_str)
+                    selected_plant_id = resp['id']
+                else:
+                    selected_plant_id = "None"
 
                 pyPosudaData = {
                     "name": request.form['name'],
@@ -187,7 +193,13 @@ class PyPosudeEndpoint:
         plantDto = plantService.getPlantById(pyPosudaDto['plant_id'])
 
         createPyPosudaForm: CreatePyPosudaForm = CreatePyPosudaForm()
+
         plant_names = plantService.getAllPlantNames()
+        if plantDto is not None:
+            plant_names.remove(plantDto['name'])
+            plant_names.insert(0, plantDto['name'])
+        plant_names.append("None")
+
         #plant_names.insert(0, plantDto['name'])
         createPyPosudaForm.name.data = pyPosudaDto['name']
         createPyPosudaForm.plant_name.choices = [(plant_name, plant_name) for plant_name in plant_names]
@@ -206,12 +218,15 @@ class PyPosudeEndpoint:
             if 'SbmBtn_ModifyPyPosuda' in request.form:
                 # create PyPosuda and update db
                 selected_plant_name = createPyPosudaForm.plant_name.data
-                data = plantService.getPlantByName(selected_plant_name)
-                # dumps the json object into an element
-                json_str = json.dumps(data)
-                # load the json to a string
-                resp = json.loads(json_str)
-                selected_plant_id = resp['id']
+                if selected_plant_name != "None":
+                    data = plantService.getPlantByName(selected_plant_name)
+                    # dumps the json object into an element
+                    json_str = json.dumps(data)
+                    # load the json to a string
+                    resp = json.loads(json_str)
+                    selected_plant_id = resp['id']
+                else:
+                    selected_plant_id = "None"
 
                 pyPosudaData = {
                     "name": request.form['name'],
@@ -381,43 +396,3 @@ def create_pie_chart_data(data,dataThresh, label):
         ]
     }
     return chart_data
-
-# @staticmethod
-# @pyPosude.route('/modify', methods=['GET', 'POST'])
-# @login_required
-# def modifyPlant():
-#
-#     #sglobal variable
-#     plant_ID = PlantEndpoint.selectedPlantToMod
-#
-#     #get plant from database by ID
-#     plantData = plantService.getPlantById(int(plant_ID))
-#
-#     modifyPLantForm: ModifyPLantForm = ModifyPLantForm();
-#     modifyPLantForm.name.data = plantData["name"]
-#     modifyPLantForm.photoURL.data = plantData["photoURL"]
-#     modifyPLantForm.humidityValue.data = plantData["humidityValue"]
-#     modifyPLantForm.tempValue.data = plantData["tempValue"]
-#     modifyPLantForm.lightValue.data = plantData["lightValue"]
-#
-#     if request.method == 'POST':
-#         if 'SbmBtn_ModifyPlant' in request.form:
-#             #modify plant and update db
-#             plant_data = {
-#                 "name": request.form['name'],
-#                 "photoURL": request.form['photoURL'],
-#                 "humidityValue": request.form['humidityValue'],
-#                 "tempValue": request.form['tempValue'],
-#                 "lightValue": request.form['lightValue']
-#             }
-#             plantService.updatePlant(json.dumps(plant_data), plant_ID)
-#             return redirect(url_for('plants.listPlants'))
-#
-#         if 'SbmBtn_DeletePlant' in request.form:
-#             plantService.deletePlantById(plant_ID)
-#             return redirect(url_for('plants.listPlants'))
-#
-#         if 'SbmBtn_UserProfile' in request.form:
-#             return redirect(url_for('users.modifyProfile'))
-#
-#     return render_template('PlantTemplates/modifyPlant.html', plantName=plantData["name"],modifyPLantForm=modifyPLantForm,current_user=current_user.username)
